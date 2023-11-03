@@ -1,13 +1,14 @@
+import { useSessionStatus } from "~/composables/useSessionStatus";
+
 // Handles the checking of authentication status
 export default defineNuxtRouteMiddleware((to, from) => {
-    const isLoggedIn = true;
-    // Check if logged or not in the register page
+    const session = useSessionStatus();
+    const isLoggedIn = session.isLoggedIn();
 
-    if(isLoggedIn){
-        // Redirect to the page we are going to
-        return navigateTo(to.fullPath);
-    }
+    console.log(isLoggedIn);
 
+    if(isLoggedIn) return;
+        
     // Redirect to the login page
     return navigateTo("/login");
 })

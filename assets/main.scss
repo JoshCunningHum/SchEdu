@@ -1,3 +1,26 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-weight: 700;
+    font-display: swap;
+    src: url('@/assets/fonts/JetBrainsMono-ExtraBold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-weight: 600;
+    font-display: swap;
+    src: url('@/assets/fonts/JetBrainsMono-Bold.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-weight: 500;
+    font-display: swap;
+    src: url('@/assets/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+}
+
+.jetbrainsmono {
+    font-family: 'JetBrains Mono';
+}
+
+.roboto {
+    font-family: Roboto;
+}

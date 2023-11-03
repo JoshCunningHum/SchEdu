@@ -1,6 +1,6 @@
 <template>
-    <div class="h-screen">
-        <slot />
+    <div>
+
     </div>
 </template>
 
@@ -8,6 +8,6 @@
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 </style>

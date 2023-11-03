@@ -1,0 +1,109 @@
+$overtone: #40DC82;
+$gray: #18181B;
+$gray-light: #424249;
+
+.text-accent {
+    color: $overtone;
+}
+
+.text-grayl {
+    color: $gray-light;
+}
+
+.bg-accent {
+    background: $overtone;
+}
+
+.border-accent {
+    border-color: $overtone;
+}
+
+.border-gray {
+    border-color: $gray;
+}
+
+.border-grayl {
+    border-color: $gray-light;
+}
+
+.bg-gray {
+    background: $gray;
+}
+
+.bg-grayl {
+    background: $gray-light;
+}
+
+body, html, #__nuxt {
+    background: $gray;
+}
+
+// Final
+
+
+$primary: #18181B;
+$secondary: #424249;
+$accent: #40DC82;
+$error: #d32752;
+
+$dark: #0D0D0D;
+$light: #F4F5F5;
+
+$color_maps : (
+    'primary': $primary,
+    'secondary': $secondary,
+    'accent': $accent,
+    'error': $error,
+    'dark': $dark,
+    'light': $light
+);
+
+@each $key, $val in $color_maps {
+    // Generate text and border
+    .text-#{$key} { color: $val }
+    .border-#{$key} { border-color: $val }
+
+    // Get the lightness first of the value then decide if wether to add color as dark or light
+    $lightness: lightness($val);
+    $opp: $light;
+
+    @if ($lightness > 50%) {
+        $opp: $dark;
+    }
+    
+    $emph: mix($opp, $val, 70%);
+
+    .text-#{$key}-em { color: $emph }
+    .border-#{$key}-em { border-color: $emph }
+
+    .bg-#{$key} {
+        background-color: $val;
+        color: $opp;
+
+        &.text-em {
+            color: $emph;
+        }
+    }
+}
+
+
+// For Scrollbars
+$sb_margin: 7px;
+$sb_width: 2px;
+
+::-webkit-scrollbar {
+    /* Customize the scrollbar width */
+    width: $sb_margin + $sb_width;
+}
+
+::-webkit-scrollbar-track {
+    /* Customize the scrollbar track */
+    box-shadow: inset 0 0 10px 10px $secondary;
+    border-left: solid $sb_margin transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    /* Customize the scrollbar thumb */
+    box-shadow: inset 0 0 10px 10px $accent;
+    border-left: solid $sb_margin transparent;
+}

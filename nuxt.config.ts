@@ -4,12 +4,16 @@ import { resolve } from "path";
 export default defineNuxtConfig({
   devtools: { enabled: false },
   alias: {
-    '@': resolve(__dirname, "/"),
+    assets: "/<rootDir>/assets"
   },
   css : [
     "~/assets/main.scss",
-    "@mdi/font/css/materialdesignicons.min.css"
-  ],
+    "~/assets/colors.scss",
+  ], 
+  ui: {
+    global: true,
+    icons: ['mdi'],
+  },
   postcss: {
     plugins: {
       tailwindcss: {},
@@ -19,7 +23,21 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
     '@vueuse/nuxt',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@nuxtjs/supabase',
   ],
+  supabase: {
+    redirect: false
+  },
+  app: {
+    head: {
+      title: 'SCHEDU'
+    }
+  },
+  components: true,
+  typescript: {
+    typeCheck: true
+  },
+  ssr: false
 })
  
