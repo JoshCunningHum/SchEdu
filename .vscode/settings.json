@@ -1,5 +1,9 @@
 {
     "nuxtr.piniaFiles.defaultTemplate": "setup",
     "nuxtr.vueFiles.style.alwaysScoped": true,
-    "nuxtr.vueFiles.style.defaultLanguage": "scss"
+    "nuxtr.vueFiles.style.defaultLanguage": "scss",
+    "nuxtr.defaultPackageManager": "NPM",
+    "nuxtr.monorepoMode.DirectoryName": "",
+    "nuxtr.openItemsAfterCreation": true,
+    "nuxtr.vueFiles.firstTag": "script"
 }

@@ -15,6 +15,7 @@
     "@vueuse/core": "^10.5.0",
     "@vueuse/nuxt": "^10.5.0",
     "nuxt": "^3.8.0",
+    "supabase": "^1.110.1",
     "typescript": "^5.2.2",
     "vue": "^3.3.7",
     "vue-router": "^4.2.5",
@@ -24,6 +25,7 @@
     "@iconify/json": "^2.2.134",
     "@nuxt/ui": "^2.9.0",
     "@pinia/nuxt": "^0.5.1",
+    "@supabase/supabase-js": "^2.38.4",
     "pinia": "^2.1.7",
     "sass": "^1.69.5",
     "yup": "^1.3.2"
