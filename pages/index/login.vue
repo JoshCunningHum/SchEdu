@@ -60,6 +60,7 @@
 <script setup>
 
 import { object, string} from 'yup';
+import { AuthControl } from '~/composables/useAuthControl';
 
 const isShowingPassword = ref(false);
 
@@ -87,7 +88,7 @@ const schema = object({
 
 const submit = async(event) => {
     const { email, password } = values.value;
-    const response = await useSignIn(email, password);
+    const response = await AuthControl.signIn(email, password);
     if(response !== true) {
         isCredentialsValid.value = true;
         form.value.validate();

@@ -16,12 +16,13 @@
 </template>
 
 <script setup>
+import { AuthControl } from '~/composables/useAuthControl';
 
 const sessionAuth = useSessionStatus();
 const username = sessionAuth.username;
 
 const logout = async() => {
-    await useLogout();
+    await AuthControl.logout();
 }
 
 </script>

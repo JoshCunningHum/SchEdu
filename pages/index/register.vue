@@ -89,7 +89,7 @@
 
 <script setup>
 import * as Yup from 'yup';
-import { useSignUp } from '~/composables/useSignUp';
+import { AuthControl } from '~/composables/useAuthControl';
 
 const existingEmail = ref('');
 
@@ -118,7 +118,7 @@ const isShowingPassword = ref(false);
 
 const submit = async(event) => {
     const { email, password, username } = values.value;
-    const response = await useSignUp(email, password, username);
+    const response = await AuthControl.signUp(email, password, username);
     if(response instanceof Error){
         existingEmail.value = email;
         form.value.validate();
