@@ -48,7 +48,7 @@ const route = useRoute();
 const router = useRouter();
 
 const signinWithProvider = async provider => {
-    client.auth.signInWithOAuth({ provider: provider });
+    client.auth.signInWithOAuth({ provider: provider, options: { redirectTo: process.env.AUTH_REDIRECT } });
 };
 
 // When user is registered
