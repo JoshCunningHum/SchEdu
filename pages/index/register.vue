@@ -89,7 +89,7 @@
 
 <script setup>
 import * as Yup from 'yup';
-import { AuthControl } from '~/composables/useAuthControl';
+import { AuthControl } from '~/controllers/AuthControl';
 
 const existingEmail = ref('');
 
@@ -129,4 +129,4 @@ const submit = async(event) => {
 
 <style lang="scss" scoped>
 
-</style>
+</style>~/controllers/useAuthControl~/controllers/AuthControl

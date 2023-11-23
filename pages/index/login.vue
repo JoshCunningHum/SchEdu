@@ -60,7 +60,7 @@
 <script setup>
 
 import { object, string} from 'yup';
-import { AuthControl } from '~/composables/useAuthControl';
+import { AuthControl } from '~/controllers/AuthControl';
 
 const isShowingPassword = ref(false);
 
@@ -106,4 +106,4 @@ watch(values, () => {
 
 <style lang="scss" scoped>
 
-</style>
+</style>~/controllers/useAuthControl~/controllers/AuthControl

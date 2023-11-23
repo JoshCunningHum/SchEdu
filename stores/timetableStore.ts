@@ -6,7 +6,6 @@ import type { Section } from "./sectionStore";
 import type { Class } from "./classStore";
 import type { Database } from "~/database.types";
 
-
 interface TimeTableParams{
     teachers: Teacher[];
     courses: Course[];

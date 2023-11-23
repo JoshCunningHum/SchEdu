@@ -15,6 +15,7 @@
     "@vueuse/core": "^10.5.0",
     "@vueuse/nuxt": "^10.5.0",
     "nuxt": "^3.8.0",
+    "prettier-plugin-tailwindcss": "^0.5.7",
     "supabase": "^1.110.1",
     "typescript": "^5.2.2",
     "vue": "^3.3.7",

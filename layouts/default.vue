@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { AuthControl } from '~/composables/useAuthControl';
+import { AuthControl } from '~/controllers/AuthControl';
 
 const sessionAuth = useSessionStatus();
 const username = sessionAuth.username;
@@ -29,4 +29,4 @@ const logout = async() => {
 
 <style lang="scss">
 
-</style>
+</style>~/controllers/useAuthControl~/controllers/AuthControl
