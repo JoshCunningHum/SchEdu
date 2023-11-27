@@ -1,21 +1,12 @@
 import { useGenID } from "~/composables/useGenID";
 import { ActivityArray, type Activity } from "./Activity";
 import { RoomTypeArray, type RoomType } from "./Room";
+import { ExtArray, ExtE } from "./ExtendedArray";
 
-export class CourseArray extends Array<Course>{
+export class CourseArray extends ExtArray<Course, CourseParams>{
 
     constructor(...courses: Array<Course | Course[]>){
-        super();
-        this.push(...courses.flat());
-    }
-
-    indexOf(course: Course){
-        return this.findIndex(c => c.id === course.id);
-    }
-
-    remove(course: Course){
-        const i = this.indexOf(course);
-        (i !== -1) && this.splice(i, 1);
+        super(...courses);
     }
 }
 
@@ -27,12 +18,12 @@ export interface CourseParams{
     room_types:RoomTypeArray;
 }
 
-export class Course{
+export class Course extends ExtE<Course>{
     id : string;
     name: string;
 
     /**Course duration in one week. Should be automatically set depends on the amount of load.*/
-    minutes: number; 
+    minutesPersession: number; 
     /**Number of meetings per week in one class. */
     weekly_meetings: number;
     /**Number of classes this course is offered in. Shouldn't be confused with the length of course_classes */
@@ -42,13 +33,27 @@ export class Course{
     /**Activities that this course is in.*/
     course_classes: ActivityArray = new ActivityArray();
 
+    get minutes(){
+        return this.minutesPersession * this.weekly_meetings;
+    }
+
+    set minutes(v){
+        this.minutesPersession = v / this.weekly_meetings;
+    }
+
     constructor({name, minutes, meetings, classes_offered, room_types} : CourseParams){
+        super();
         this.id = useGenID(8);
         this.name = name || `Course ${this.id}`;
         this.minutes = minutes || 0;
+        this.minutesPersession = minutes / meetings;
         this.weekly_meetings = meetings || 0;
         this.classes_offered = classes_offered || 0;
         this.compatible_rooms = room_types || new RoomTypeArray();
+    }
+
+    equals(obj: Course){
+        return obj.id === this.id;
     }
 
     // For debugging

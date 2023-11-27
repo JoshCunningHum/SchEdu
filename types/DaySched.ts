@@ -14,9 +14,11 @@ export enum Day{
 }
 
 export class DaySchedArray extends Array<DaySched>{ 
+    id: string;
 
     constructor(...scheds: Array<DaySched[] | DaySched>){
         super();
+        this.id = useGenID(8);
         this.push(...scheds.flat());
     }
 
@@ -44,11 +46,11 @@ export interface DaySchedParams{
 }
 
 export class DaySched{
-    static create_week(settings: TimetableSettings) : DaySchedArray {
+    static create_week(settings: TimetableSettings, cstart?: number, cend?: number) : DaySchedArray {
         const { start, end, include_sat } = settings;
 
         const last = include_sat ? Day.SAT : Day.FRI;
-        return new DaySchedArray(new Array(last).map((v, day) => new DaySched({day, start, end, settings})));
+        return new DaySchedArray(new Array(last).fill(0).map((v, day) => new DaySched({day: day + 1, start: cstart || start, end: cend || end, settings})));
     }
 
     day: Day;

@@ -1,10 +1,13 @@
 // Handles un authorized access on timetables that is not owned
 
 import { useTimetableStore } from "~/stores/timetableStore";
+import { RoomArray } from "~/types/Room";
 
 export default defineNuxtPlugin(nuxt => {
     const nuxtApp = useNuxtApp();
     const timetableStore = useTimetableStore(nuxtApp.$pinia);
+
+    window.RoomArray = RoomArray;
 
     // The route middle ware
     addRouteMiddleware('prevent-access-on-unowned-timetables', async (to, from) => {

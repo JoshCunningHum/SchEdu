@@ -1,5 +1,5 @@
 <template>
-    <div id="root" :style="`font-size: ${fontSize}`" @click="goHome" class="cursor-pointer">
+    <div id="root" :style="`font-size: ${fontSize}`" @click="goHome" class="cursor-pointer w-full h-full">
         <div v-if="isMini">
             <span>S</span>
             <span class="text-accent">E</span>
@@ -8,8 +8,8 @@
             <div class="max-w-min" :style="`line-height: ${fontSize};`">SCH<span class="text-accent">EDU</span>LE</div>
             <div class="max-w-min text-accent" :style="`line-height: ${fontSize}; margin-top: -10px`">&nbsp;&nbsp;&nbsp;CATION</div>
         </div>
-        <div v-else-if="isCalendar">
-            <img src="@/assets/logo/logo-calendar.png">
+        <div class="h-full w-full" v-else-if="isCalendar">
+            <img class="h-full w-full" src="@/assets/logo/logo-calendar.png">
         </div>
         <div v-else>
             <span>SCH</span>

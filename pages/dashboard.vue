@@ -15,7 +15,7 @@
                         <div>
                             <!-- Here lies the settings -->
                             <!-- Legend says that this component's seal should only be broken when the prophesized settings feature has already been fulfilled -->
-                            <!-- <UButton icon="i-mdi-gear" padded :ui="{rounded: 'rounded-full'}" /> -->
+                            <UButton icon="i-mdi-gear" padded :ui="{rounded: 'rounded-full'}" />
                         </div>
                     </div>
                 </div>
@@ -50,10 +50,6 @@
                         icon="i-mdi-plus"
                         square
                         to="/dashboard/create-timetable"
-                    />
-                    <UButton
-                        icon="i-mdi-gear"
-                        square
                     />
                 </div>
             </div>

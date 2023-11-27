@@ -1,25 +1,19 @@
 import { defineStore } from "pinia";
-import type { Teacher } from "./teacherStore";
-import type { Course } from "./courseStore";
-import type { Room } from "./roomStore";
-import type { Section } from "./sectionStore";
-import type { Class } from "./classStore";
 import type { Database } from "~/database.types";
+import { TimetableBuilder, Timetable, type TimetableParams } from "~/types/Timetable";
 
-interface TimeTableParams{
-    teachers: Teacher[];
-    courses: Course[];
-    rooms: Room[];
-    section: Section[];
-    classes: Class[];
-}
+interface TimeTableOutput extends Timetable{}
 
-interface TimeTable{
+export interface TimeTableModel{
     id: number;
     created: string;
     by: string;
     name: string;
-    data: {sched: string, params: TimeTableParams} | null;
+    // HACK: This property is a string inside the database, this is to avoid excessive changes on both the codebase and the database model, once the Timetable Datastructure is finalized, this will be resolve
+    data: {
+        sched: TimeTableOutput, 
+        params: TimetableParams
+    } | null;
 }
 
 export const useTimetableStore = defineStore('timetable', () => {
@@ -27,8 +21,9 @@ export const useTimetableStore = defineStore('timetable', () => {
     const session = useSessionStatus();
     const isRequesting = ref(false);
 
-    const data = ref(new Array<TimeTable>());
-    const selected = ref<TimeTable | null>(null);
+    const data = ref(new Array<TimeTableModel>());
+    
+    const selected = ref<TimeTableModel | null>(null);
     const hasChanges = ref(false);
 
     const select = (id : number) => {
@@ -57,13 +52,14 @@ export const useTimetableStore = defineStore('timetable', () => {
 
         clear();
 
+        // TODO: Make a better serializer to maintain references
         data.value.push(...response.map(t => {
-            return <TimeTable>{
+            return <TimeTableModel>{
                 id: t.id,
                 created: t.created || '',
                 by: t.by || '',
                 name: t.name,
-                data: t.data ? (JSON.parse(t.data) as TimeTable['data']) : { params: <TimeTableParams>{}, sched: ''}
+                data: t.data ? (JSON.parse(t.data) as TimeTableModel['data']) : { params: TimetableBuilder(), sched: new Timetable()}
             }
         }));
 
@@ -83,7 +79,7 @@ export const useTimetableStore = defineStore('timetable', () => {
         concludeRequest();
     }
 
-    const remove = async (...ids: TimeTable['id'][]) => {
+    const remove = async (...ids: TimeTableModel['id'][]) => {
         if(!tryRequest()) return;
         
         const { error } = await supabase
@@ -116,7 +112,7 @@ export const useTimetableStore = defineStore('timetable', () => {
         concludeRequest();
     }
 
-    const setData = async (id: string, data: TimeTable['data']) => {
+    const setData = async (id: string, data: TimeTableModel['data']) => {
         if(!tryRequest()) return;
 
         const { error } = await supabase

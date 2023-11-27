@@ -1,7 +1,11 @@
 <template>
-    <UContainer class="flex flex-col flex-grow py-4 pb-6 gap-4 w-full h-full min-h-0">
+    <UContainer class="flex flex-col flex-grow pb-6 gap-4 w-full h-full min-h-0">
+        <!-- Timetable Setting Modal -->
+        <TimetableSettingsModal v-model="isOpenSettings" />
+
+        <!---->
         <div class="h-32 flex gap-6" style="min-height: 8rem;">
-            <div class="w-52 text-6xl flex items-center">
+            <div class="w-32 text-6xl flex items-center">
                 <Logo calendar/>
             </div>
             <div class="flex-grow flex justify-between items-center">
@@ -19,21 +23,20 @@
                 <div class="flex items-end justify-end h-full flex-col roboto">
                     
                     <!-- <div>{{ id }}</div> -->
-                    <UButton icon="i-mdi-gear" class="mt-2" :ui="{ rounded: 'rounded-full' }"/>
-
+                    <UButton icon="i-mdi-gear" class="mt-2" :ui="{ rounded: 'rounded-full' }" @click="isOpenSettings = true" />
                 </div>
             </div>
         </div>
         <!-- -->
         <div class="flex-grow flex gap-6 min-h-0">
             <!-- Parameters -->
-            <div class="h-full overflow-auto">
+            <div class="h-full  overflow-auto">
                 <UVerticalNavigation
                     class="border-s border-secondary pl-0"
                     :links="paramlinks"
                     :ui="{
                         wrapper: 'rounded-0',
-                        base: 'group',
+                        base: 'group -m-px border-s border-transparent',
                         padding: '',
                         rounded: 'rounded-none',
                         font: '',
@@ -51,7 +54,7 @@
             <div class="flex-grow bg-secondary rounded-md ">
                 <!-- <div class="bg-accent text-em jetbrainsmono font-bold">TEST</div> -->
                 <div v-if="isOpeningParam" class="w-full h-full"> <!-- Paremeters-->
-                    <NuxtPage class="h-full"/>
+                    <NuxtPage class="h-full relative"/>
                 </div>
                 <div v-else> <!-- Timetable Viewer -->
 
@@ -99,11 +102,6 @@ const paramlinks = [
         to: { name: 'timetable-id-sections', params: { id: id }},
         shortcuts: ['B']
     },
-    {
-        label: 'Classes',
-        to: { name: 'timetable-id-classes', params: { id: id }},
-        shortcuts: ['N']
-    }
 ]
 
 const isOpeningParam = computed(() => route.name !== 'timetable-id');
@@ -121,6 +119,9 @@ onUnmounted(() => timeTableStore.select(null));
 // Handle UI
 const timeTable = computed(() => timeTableStore.selected);
 const formatter = date => useUseSTDTimeFormat(date);
+
+// Handle Timetable settings
+const isOpenSettings = ref(false);
 
 </script>
 

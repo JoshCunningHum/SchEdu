@@ -1,4 +1,4 @@
-import { RoomTypeArray, RoomArray } from "./Room";
+import { RoomTypeArray, RoomArray, RoomType } from "./Room";
 import { CourseArray, type Course } from "./Course";
 import { Instructor, InstructorArray } from "./Instructor";
 import { SectionArray, type Section } from "./Section";
@@ -15,7 +15,7 @@ export class TimetableSettings{
     thrice_prio = [[1, 3, 5], [2, 4, 6]];
 
     include_sat = true;
-    room_types : RoomTypeArray = new RoomTypeArray('Normal', 'Large', 'ScienceLab', 'ComLab');
+    room_types : RoomTypeArray = new RoomTypeArray().from(['Normal','#555555'],['Large', '#1E1B18'], ['ScienceLab', '#2D9E61'],['ComLab','#A78BFB']);
 
     // Constraints
     max_instructor_minutes_per_day = 480;
@@ -32,24 +32,35 @@ export interface TimetableParams{
     settings?: TimetableSettings;
 }
 
+export const TimetableBuilder = () : TimetableParams => {
+    return {
+        rooms: new RoomArray(),
+        courses: new CourseArray(),
+        instructors: new InstructorArray(),
+        sections: new SectionArray(),
+        settings: new TimetableSettings()
+    }
+};
+
 export class Timetable{
 
-    settings: TimetableSettings; // Loads the default settings
+    settings: TimetableSettings = new TimetableSettings(); // Loads the default settings
 
     name: string = "Unnamed Timetable";
-    rooms : RoomArray;
-    courses : CourseArray;
-    instructurs : InstructorArray;
-    sections : SectionArray;
+    rooms?: RoomArray;
+    courses?: CourseArray;
+    instructors?: InstructorArray;
+    sections?: SectionArray;
 
-    constructor({ rooms, courses, instructors, sections, settings } : TimetableParams){
+    generate(params: TimetableParams){
+        // We clone the parameters because thats how it is
+        const { rooms, courses, instructors, sections, settings } = structuredClone(params);
+
         this.rooms = rooms;
         this.courses = courses;
-        this.instructurs = instructors;
+        this.instructors = instructors;
         this.sections = sections;
         this.settings = settings || new TimetableSettings();
-
-        const { room_types } = this.settings;
 
         // SUGGEST: Doesn't even needed to create a copy, a sorted courseArray does not matter much 
         // Get a copy of all courses then sort them by the amount of room types they are available

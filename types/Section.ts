@@ -1,37 +1,22 @@
-import { useGenID } from '~/composables/useGenID';
-import { Course, CourseArray } from './Course';
-import { Day, DaySched, DaySchedArray } from './DaySched';
+import { CourseArray } from './Course';
+import { DaySched, DaySchedArray } from './DaySched';
 import type { TimetableSettings } from './Timetable';
+import { ExtArray, ExtE } from './ExtendedArray';
 
-export class SectionArray extends Array<Section>{
+export class SectionArray extends ExtArray<Section, SectionParams>{
     
     constructor(...scheds: Array<Section[] | Section>){
-        super();
-        this.push(...scheds.flat());
-    }
-
-    add(params : SectionParams | Section) : Section {
-        const n = params instanceof Section ? params : new Section(params);
-        this.push(n);
-        return n;
-    }
-
-    indexOf(sec: Section){
-        return this.findIndex(s => s.id === sec.id);
-    }
-
-    remove(sec: Section){
-        const i = this.indexOf(sec);
-        (i !== -1) && this.splice(i, 1);
+        super(...scheds);
     }
 }
 
 export interface SectionParams{
+    id: string;
     section_courses: CourseArray;
     settings: TimetableSettings;
 }
 
-export class Section{
+export class Section extends ExtE<Section>{
     id: string;
     // year_level: number; // useless for some reason
 
@@ -41,12 +26,17 @@ export class Section{
 
     settings: TimetableSettings;
 
-    constructor({ section_courses, settings } : SectionParams){
-        this.id = useGenID(8);
+    constructor({ section_courses, settings, id } : SectionParams){
+        super();
+        this.id = id;
         this.section_courses = section_courses;
         this.settings = settings;
 
         this.scheds = DaySched.create_week(settings);
+    }
+
+    equals(sec: Section){
+        return sec.id === this.id;
     }
 
     print(){

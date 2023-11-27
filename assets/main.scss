@@ -17,6 +17,18 @@
     src: url('@/assets/fonts/JetBrainsMono-Regular.ttf') format('truetype');
 }
 
+*{
+    font-family: DM Sans,DM Sans fallback,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;
+}
+
+.scroll-grow{
+    @apply overflow-y-auto min-h-0 flex-grow;
+}
+
+.scroll-stable{
+    scrollbar-gutter: stable;
+}
+
 .jetbrainsmono {
     font-family: 'JetBrains Mono';
 }

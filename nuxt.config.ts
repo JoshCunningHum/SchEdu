@@ -38,6 +38,6 @@ export default defineNuxtConfig({
   typescript: {
     typeCheck: true
   },
-  ssr: false
+  ssr: false,
 })
  
