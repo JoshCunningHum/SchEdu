@@ -18,11 +18,13 @@ export const useRoomStore = defineStore('roomStore', () => {
   const addRoom = (type: RoomType, name: string) => {
     if(!settings.value) return console.error('Settings is undefined');
     if(rooms.value) rooms.value.create(Room, {type, name, settings: settings.value});
+    timetableStore.change();
   }
 
   const removeRoom = (id: string | Room) => {
     if(!settings.value) return console.error('Settings is undefined');
     if(rooms.value) rooms.value.remove(id instanceof Room ? id : (r => r?.id === id));
+    timetableStore.change();
   }
 
   return <RoomStore>{

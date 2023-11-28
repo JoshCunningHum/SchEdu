@@ -28,11 +28,13 @@ export const useTeacherStore = defineStore('teacherStore', () => {
     // Update data object
     timeTableStore.hasChanges = true;
     params.value?.instructors.push(teacher);
+    timeTableStore.change();
   }
 
   const removeTeacher = (id: string) => {
     const target = teachers.value?.find(t => t.id === id);
     if(target) teachers.value?.remove(target);
+    timeTableStore.change();
   }
 
   return {

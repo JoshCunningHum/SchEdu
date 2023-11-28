@@ -40,7 +40,7 @@ const columns = [{
   sortable: true
 }];
 
-const selectedCourses = ref<Array<Course>>([]);
+const selectedCourses = ref<Array<Course>>([...props.modelValue]);
 
 onUpdated(() => {
   selectedCourses.value.splice(0);

@@ -27,8 +27,6 @@ const addCourse = () => {
     if (!name.value || !offered.value || offered.value < 1) return;
     courseStore.addCourse(name.value, meetings.value, offered.value, minutes.value * meetings.value);
     name.value = '';
-    offered.value = undefined;
-    minutes.value = interval.value || 15;
     isCreating.value = false;
 }
 

@@ -40,7 +40,6 @@ export class Instructor extends ExtE<Instructor>{
         this.max_minutes = max_minutes || Number.MAX_SAFE_INTEGER;
 
         this.scheds = DaySched.create_week(settings, period_start, period_end);
-        console.log(this.scheds);
     }
 
     addMinutes(minutes: number) : boolean {

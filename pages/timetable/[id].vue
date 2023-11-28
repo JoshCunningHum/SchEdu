@@ -11,7 +11,9 @@
             <div class="flex-grow flex justify-between items-center">
                 <div class="flex flex-col justify-end h-full">
                     <div class="roboto text-end text-sm">Last Update: {{ formatter(timeTable?.created) }}</div>
-                    <UButton class="w-60 flex justify-center">Update</UButton>
+                    <UChip :show="timeTableStore.hasChanges" color="red">
+                        <UButton class="w-60 flex justify-center" @click="updateData()" :loading="isUpdatingData">{{ isUpdatingData ? 'Updating' : 'Update' }}</UButton>
+                    </UChip>
                 </div>
 
                 <div class="h-full flex items-end">
@@ -53,11 +55,13 @@
             <!-- Table/Parameter Values -->
             <div class="flex-grow bg-secondary rounded-md ">
                 <!-- <div class="bg-accent text-em jetbrainsmono font-bold">TEST</div> -->
-                <div v-if="isOpeningParam" class="w-full h-full"> <!-- Paremeters-->
+                <!-- Paremeters-->
+                <div v-if="isOpeningParam" class="w-full h-full"> 
                     <NuxtPage class="h-full relative"/>
                 </div>
-                <div v-else> <!-- Timetable Viewer -->
-
+                <!-- Timetable Viewer -->
+                <div v-else class="w-full h-full p-2"> 
+                    <UButton @click="timeTableStore.generate()">Generate</UButton>
                 </div>
             </div>
         </div>
@@ -122,6 +126,15 @@ const formatter = date => useUseSTDTimeFormat(date);
 
 // Handle Timetable settings
 const isOpenSettings = ref(false);
+const isUpdatingData = ref(false);
+
+// Update Timetable
+const updateData = async () => {
+    isUpdatingData.value = true;
+    const result = await timeTableStore.setData();
+    if(!result) alert(`Something wen't wrong when updating... Please try again later.`)
+    isUpdatingData.value = false;
+}
 
 </script>
 

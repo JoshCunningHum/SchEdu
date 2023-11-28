@@ -1,8 +1,8 @@
-import { Course } from './Course';
-import { DaySched } from './DaySched';
-import { Instructor } from './Instructor';
-import { Room } from './Room';
-import { Section } from './Section';
+import { Course, CourseArray } from './Course';
+import { DaySched, DaySchedArray } from './DaySched';
+import { Instructor, InstructorArray } from './Instructor';
+import { Room, RoomArray } from './Room';
+import { Section, SectionArray } from './Section';
 
 export class ActivityArray extends Array<Activity>{
     
@@ -30,36 +30,55 @@ export class ActivityArray extends Array<Activity>{
 export interface ActivityParams{
     start: number;
     duration: number;
-    course: Course;
     sched: DaySched;
+    course?: Course;
+    room?: Room;
     instance: number;
 }
 
 export class Activity{
     start_time: number;
     duration: number;
-    course: Course;
+    sched: number;
 
-    room?: Room;
-    sched: DaySched;
-    instructor?: Instructor;
-    section?: Section;
+    courseID?: string;
+    roomID?: string;
+    instructorID?: string;
+    sectionID?: string;
+
     instance: number = 0;
 
+    room(arr: RoomArray){
+        return arr.find(r => r.id === this.roomID);
+    }
+
+    course(arr: CourseArray) {
+        return arr.find(c => c.id === this.courseID);
+    }
+
+    instructor(arr: InstructorArray) {
+        return arr.find(i => i.id === this.instructorID);
+    }
+
+    section(arr: SectionArray) {
+        return arr.find(s => s.id === this.sectionID);
+    }
 
     get end(){
         return this.start_time + this.duration;
     }
 
-    constructor({start, duration, course, sched, instance} : ActivityParams ){
+    constructor({start, duration, course, sched, instance, room} : ActivityParams ){
         this.start_time = start;
         this.duration = duration;
-        this.course = course;
-        this.sched = sched;
+        this.sched = sched.day;
         this.instance = instance;
+
+        this.roomID = room?.id;
+        this.courseID = course?.id;
     }
 
     equals(act: Activity){
-        return this.start_time === act.start_time && this.duration === act.duration && this.sched.day === act.sched.day;
+        return this.start_time === act.start_time && this.duration === act.duration && this.sched === act.sched;
     }
 }

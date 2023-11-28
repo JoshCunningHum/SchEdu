@@ -4,7 +4,6 @@ import type { TimetableSettings } from './Timetable';
 import { ExtArray, ExtE } from './ExtendedArray';
 
 export class SectionArray extends ExtArray<Section, SectionParams>{
-    
     constructor(...scheds: Array<Section[] | Section>){
         super(...scheds);
     }

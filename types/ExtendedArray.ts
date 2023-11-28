@@ -51,4 +51,9 @@ export class ExtArray<T extends ExtE<T>, U> extends Array<T>{
         this.forEach((...[o, i]) => n.push(predicate(o, i, this)));
         return n;
     }
+
+    // I know kinda not useful, but is used for getting the exact reference of the element to enable mutation to the elements of this array. Since 2 elements can be equal but those 2 is not necessarily on the same location in the memory
+    get(obj: T) : T | undefined {
+        return this.find(o => o.equals(obj));
+    }
 }

@@ -9,6 +9,7 @@ export const useCourseStore = defineStore('courseStore', () => {
 
   const addCourse = (name: string, meetings: number, classes: number, minutes: number) => {
     if(!courses.value) return;
+
     courses.value.create(Course, {
       name,
       meetings,
@@ -16,11 +17,14 @@ export const useCourseStore = defineStore('courseStore', () => {
       minutes,
       room_types: settingsStore.roomTypes ? new RoomTypeArray(...settingsStore.roomTypes) : new RoomTypeArray()
     });
+
+    timeTableStore.change();
   }
 
   const removeCourse = (id: string | Course) => {
     if(!courses.value) return;
     courses.value.remove(id instanceof Course ? id : (c => c?.id === id));
+    timeTableStore.change();
   }
 
   return {

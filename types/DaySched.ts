@@ -56,7 +56,6 @@ export class DaySched{
     day: Day;
     period_start: number;
     period_end: number;
-    room?: Room;
     activities: ActivityArray = new ActivityArray();
     is_vacant: boolean[];
     /** This serves as the TOP of the STACK of classes within the schedule */
@@ -76,9 +75,8 @@ export class DaySched{
         return (this.current_vacant - this.period_start) / this.settings.interval;
     }
 
-    constructor({ day, room, start, end, settings} : DaySchedParams ){
+    constructor({ day, start, end, settings} : DaySchedParams ){
         this.day = day || Day.SUN;
-        this.room = room;
         this.period_start = start || 0;
         this.period_end = end || 0;
         this.current_vacant = start || 0;
@@ -86,7 +84,8 @@ export class DaySched{
         const {interval, exlude_periods: exclusions } = settings;
 
         const NumberOfPeriods = Math.floor(this.period_duration / interval);
-        this.is_vacant = new Array(NumberOfPeriods).map((v, i) => exclusions?.includes(interval * i + this.period_start));
+
+        this.is_vacant = new Array(NumberOfPeriods).fill(0).map((v, i) => !exclusions?.includes(interval * i + this.period_start) || true);
 
         // Set TimeTable Settings reference for later
         this.settings = settings;
@@ -97,12 +96,17 @@ export class DaySched{
         let { index_current_vacant: icv, settings: { interval } } = this;
 
         for(let i = 0; i < duration / interval; i++){
-            if(icv + i >= this.number_of_periods) return false;
+            console.log(icv, i, duration);
+            if(icv + i >= this.number_of_periods) {
+                console.log(`Conflict on Period ${(icv + i) * interval + this.period_start}`);
+                return false;
+            }
             if(!this.is_vacant[icv + i]){
                 icv++;
-                i--;
+                i = -1;
             }
         }
+        
         return true;
     }
 
@@ -114,7 +118,7 @@ export class DaySched{
             if(!this.is_vacant[icv + i]){
                 this.current_vacant += interval;
                 icv++;
-                i--;
+                i = -1;
             }
         }
 
@@ -151,7 +155,7 @@ export class DaySched{
     }
 
     equals(sched: DaySched) : boolean {
-        return this.day === sched.day && (!this.room || !sched.room || this.room.equals(sched.room));
+        return this.day === sched.day;
     }
 
     PrintVacancy(){

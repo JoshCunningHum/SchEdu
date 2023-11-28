@@ -45,9 +45,9 @@ export class Course extends ExtE<Course>{
         super();
         this.id = useGenID(8);
         this.name = name || `Course ${this.id}`;
+        this.weekly_meetings = meetings || 0;
         this.minutes = minutes || 0;
         this.minutesPersession = minutes / meetings;
-        this.weekly_meetings = meetings || 0;
         this.classes_offered = classes_offered || 0;
         this.compatible_rooms = room_types || new RoomTypeArray();
     }
