@@ -1,15 +1,15 @@
-# SchEdu
+# Project
 
-A Scheduling Assistant for Educational Institutions
+Project Description
 
 <em>[TODO.md spec & Kanban Board](https://bit.ly/3fCwKfM)</em>
 
 ### Todo
 
-- [ ] Reassign Dashboard Control  
 
 ### In Progress
 
+- [ ] Put Timeout  
 
 ### Done ✓
 

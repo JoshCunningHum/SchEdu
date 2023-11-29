@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import type { RoomType } from '~/types/Room';
+import { RoomTypeArray, type RoomType } from '~/types/Room';
 
 const timetableStore = useTimetableStore();
 const settings = computed(() => timetableStore.selected?.data?.params.settings);
 
 // Room Deletion
-const room_types = computed(() => settings.value?.room_types);
+const room_types = computed<RoomTypeArray>(() => settings.value?.room_types || new RoomTypeArray());
 
 const remove = (roomType: RoomType) => {
   if(room_types.value === undefined || room_types.value.length === 1) return;

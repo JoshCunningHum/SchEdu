@@ -1,13 +1,279 @@
-<template>
-    <div>
-        
-    </div>
-</template>
+<script setup lang="ts">
+import { CourseArray } from '~/types/Course';
+import { Instructor, InstructorArray } from '~/types/Instructor';
+import { Room, RoomArray } from '~/types/Room';
+import { Section, SectionArray } from '~/types/Section';
+import { TimetableBuilder, TimetableSettings, type TimetableParams } from '~/types/Timetable';
 
-<script setup>
+
+const timetableStore = useTimetableStore();
+
+// Sched Data
+
+const sched = computed(() => timetableStore.selected?.data?.sched);
+const params = computed<TimetableParams>(() => timetableStore.selected?.data?.params || TimetableBuilder());
+const settings = computed(() => params.value.settings || new TimetableSettings());
+
+const start = computed(() => settings.value.start);
+const end = computed(() => settings.value.end);
+const duration = computed(() => end.value - start.value);
+const interval = computed(() => settings.value.interval);
+
+const periods = computed(() => Array(duration.value / interval.value + 1).fill(0).map((v, i) => {
+    const std = useMinutesToTime(i * interval.value + start.value);
+
+    return {
+        label: std.str,
+        mins: std.mins,
+        isPM: std.isPM,
+        hrs: std.hrs,
+        rhrs: std.rhrs,
+        og: std.og
+    }
+}));
+
+// Specifying the Schedule
+const categoryList = ['Rooms', 'Teachers', 'Sections'];
+const category = ref(categoryList[0]);
+
+const rooms = computed(() => sched.value?.rooms || new RoomArray());
+const instructors = computed(() => sched.value?.instructors || new InstructorArray());
+const sections = computed(() => sched.value?.sections || new SectionArray());
+const courses = computed(() => sched.value?.courses || new CourseArray());
+const categoryValues = computed(() => {
+    return [
+        rooms.value, 
+        instructors.value, 
+        sections.value][category.value === 'Rooms' ? 0 : category.value === 'Teachers' ? 1 : 2]
+    .map(v => v);
+})
+const value = ref<Room | Instructor | Section | undefined>(undefined);
+
+watch(categoryValues, v => {
+    if(v.length) value.value = v[0];
+    else value.value = undefined;
+});
+
+// Zooming
+const zoomRaw = ref(50);
+const zoomValue = computed(() => 101 - zoomRaw.value);
+
+const table = ref<InstanceType<typeof HTMLDivElement>>();
+
+const minHeightPerHour = ref(100);
+const maxHeightPerHour = computed(() => 200);
+const heightPerHour = computed(() => (maxHeightPerHour.value - minHeightPerHour.value) * (zoomValue.value / 100) + minHeightPerHour.value);
+const heightPerPeriod = computed(() => heightPerHour.value * (interval.value / 60));
+
+const getPosition = (minutes: number, isStart: boolean = true) : number => {
+    if(isStart) minutes -= start.value;
+    const applied_offset = isStart ? heightPerPeriod.value / 2 : 0;
+    const periodsCovered = minutes / interval.value;
+    return applied_offset + periodsCovered * heightPerPeriod.value;
+}
+
+// Disable zooming on firefox
+const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
 
 </script>
 
-<style lang="scss" scoped>
+<template>
+    <div class="w-full flex-grow relative flex gap-1 min-h-0">
+        <!-- Actual Content -->
+        <div class="flex-grow h-full flex flex-col">
 
+            <div class="w-full" style="padding-right: 9px;">
+                
+                <div class="mb-2 flex gap-2">
+                    <div class="w-52">
+                        <USelectMenu :options="categoryList" v-model="category"/>
+                    </div>
+                    <div class="w-52">
+                        <USelectMenu :options="categoryValues" v-model="value"> 
+                            
+                            <template #label>
+                                {{ category.slice(0, -1) }} - {{ value instanceof Section ? value.id : value instanceof Room || value instanceof Instructor ? value.name : 'None Selected' }}
+                            </template>
+
+                            <template #option="{ option: value }">
+                                <span> {{ value instanceof Section ? value.id : value instanceof Room || value instanceof Instructor ? value.name : '' }} </span>
+                            </template>
+
+                        </USelectMenu>
+                    </div>
+                </div>
+
+                <div class="header flex overflow-x-hidden border-t">
+                    <div>Time</div>
+                    <div>Monday</div>
+                    <div>Tuesday</div>
+                    <div>Wednesday</div>
+                    <div>Thursday</div>
+                    <div>Friday</div>
+                    <div>Saturday</div>
+                </div>
+
+            </div>
+
+            <div class="min-h-0 overflow-y-auto flex-grow scroll-stable">
+
+                <div class="h-full flex container" ref="table">
+
+                    <div>
+                        <div v-for="p in periods" :key="p.label" :style="`height: ${heightPerPeriod}px;`"
+                            class="flex justify-center items-center content-center">
+                            <UDivider :label="p.label" :ui="{ border: { base: 'border-white dark:border-white'}}" />
+                        </div>
+                    </div>
+                    
+                    <div v-for="i in 6" :key="i" class="relative">
+                        <div v-for="p in periods" :key="p.label" :style="`height: ${heightPerPeriod}px`" class="flex justify-center items-center content-center">
+                            <UDivider :ui="{ border: { base: 'border-white dark:border-white'}}" />
+                        </div>
+                        <template v-if="!!value && value.scheds && value.scheds.length > i - 1 && value.scheds[i - 1]">
+                            
+                            <div v-for="a in value.scheds[i-1].activities" 
+                                class="absolute bg-accent top-0 flex items-center justify-center border text-xs jetbrainsmono" 
+                                :style="`width: 96%; left: 2%; top: ${getPosition(a.start_time) - 1}px; height: ${getPosition(a.duration, false) + 1}px;`">
+                                {{ a.course(courses)?.name || 'No Name' }}
+                                <!-- {{ a.duration || 'No Name' }} -->
+                            </div>
+
+                        </template>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+        <!-- Slider for scaling -->
+        <div class="h-full w-4" v-if="!isFirefox">
+            <input type="range" min="1" max="100" v-model="zoomRaw" class="vertical-slider h-full w-4 rounded-full" />
+        </div>
+    </div>
+</template>
+
+<style lang="scss" scoped>
+.container>div {
+    @apply flex-grow -mt-px -ml-px w-full h-full; 
+
+    &:first-child{
+        margin-left: 0;
+    }
+}
+
+.header > div {
+    @apply flex-grow h-full w-full text-center -ml-px;
+
+    &:first-child{
+        margin-left: 0;
+    } 
+
+    font-family: "Jetbrains Mono";
+}
+
+.vertical-slider {
+    appearance: slider-vertical;
+    -moz-appearance: slider-vertical;
+    -webkit-appearance: slider-vertical;
+}
+
+// .vertical-range::-webkit-slider-runnable-track{
+//     @apply rounded-full;
+// }
+
+// input[type=range].vertical-range {
+//   width: 100%;
+//   margin: 5px 0;
+//   background-color: transparent;
+//    appearance: slider-vertical;
+//    -moz-appearance: slider-vertical;
+//    -webkit-appearance: slider-vertical;
+// }
+
+
+// input[type=range].vertical-range:focus {
+//   outline: none;
+// }
+// input[type=range].vertical-range::-webkit-slider-runnable-track {
+//   background: #171717;
+//   border: 1px solid rgba(1, 1, 1, 0.2);
+//   border-radius: 25px;
+//   width: 100%;
+//   height: 0px;
+//   cursor: pointer;
+// }
+// input[type=range].vertical-range::-webkit-slider-thumb {
+//   margin-top: -6px;
+//   width: 10px;
+//   height: 10px;
+//   background: #171717;
+//   border: 2px solid #3fd398;
+//   border-radius: 50px;
+//   cursor: pointer;
+//   -webkit-appearance: none
+// }
+// input[type=range].vertical-range:focus::-webkit-slider-runnable-track {
+//   background: #3d3d3d;
+// }
+// input[type=range].vertical-range::-moz-range-track {
+//   background: #171717;
+//   border: 1px solid rgba(1, 1, 1, 0.2);
+//   width: 100%;
+//   height: 0px;
+//   cursor: pointer;
+// }
+// input[type=range].vertical-range::-moz-range-thumb {
+//   width: 10px;
+//   height: 10px;
+//   background: #171717;
+//   border: 2px solid #3fd398;
+//   border-radius: 50px;
+//   cursor: pointer;
+// }
+// input[type=range].vertical-range::-ms-track {
+//   background: transparent;
+//   border-color: transparent;
+//   border-width: 5px 0;
+//   color: transparent;
+//   width: 100%;
+//   height: 0px;
+//   cursor: pointer;
+// }
+// input[type=range].vertical-range::-ms-fill-lower {
+//   background: #000000;
+//   border: 1px solid rgba(1, 1, 1, 0.2);
+//   border-radius: 50px;
+// }
+// input[type=range].vertical-range::-ms-fill-upper {
+//   background: #171717;
+//   border: 1px solid rgba(1, 1, 1, 0.2);
+//   border-radius: 50px;
+// }
+// input[type=range].vertical-range::-ms-thumb {
+//   width: 10px;
+//   height: 10px;
+//   background: #171717;
+//   border: 2px solid #3fd398;
+//   border-radius: 50px;
+//   cursor: pointer;
+//   margin-top: 0px;
+//   /*Needed to keep the Edge thumb centred*/
+// }
+// input[type=range].vertical-range:focus::-ms-fill-lower {
+//   background: #171717;
+// }
+// input[type=range].vertical-range:focus::-ms-fill-upper {
+//   background: #3d3d3d;
+// }
+// /*TODO: Use one of the selectors from https://stackoverflow.com/a/20541859/7077589 and figure out
+// how to remove the virtical space around the range input in IE*/
+// @supports (-ms-ime-align:auto) {
+//   /* Pre-Chromium Edge only styles, selector taken from hhttps://stackoverflow.com/a/32202953/7077589 */
+//   input[type=range].vertical-range {
+//     margin: 0;
+//     /*Edge starts the margin from the thumb, not the track as other browsers do*/
+//   }
+// }
 </style>

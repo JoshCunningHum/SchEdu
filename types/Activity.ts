@@ -1,3 +1,4 @@
+import { isThisTypeNode } from 'typescript';
 import { Course, CourseArray } from './Course';
 import { DaySched, DaySchedArray } from './DaySched';
 import { Instructor, InstructorArray } from './Instructor';
@@ -37,6 +38,8 @@ export interface ActivityParams{
 }
 
 export class Activity{
+    id: string;
+
     start_time: number;
     duration: number;
     sched: number;
@@ -69,6 +72,7 @@ export class Activity{
     }
 
     constructor({start, duration, course, sched, instance, room} : ActivityParams ){
+        this.id = useGenID(8);
         this.start_time = start;
         this.duration = duration;
         this.sched = sched.day;

@@ -33,7 +33,7 @@
                     truncate 
                     @click="select(index)"
                     class="w-full" 
-                    :color="`${selected?.id === t.id ? 'primary' : ''}`" 
+                    :color="`${selected?.id === t.id ? 'primary' : 'white'}`" 
                     :label="t.name || `[No Name]`"/>
                 </template>
                 <EmptyDisplay v-if="filteredTeacher.length === 0">
@@ -73,6 +73,9 @@
                         <UFormGroup label="Schedule Customize">
                             <DaySchedInput :scheds="selected.scheds" />
                         </UFormGroup>
+                        <SectionAlert class="border-secondary-em">
+                            Timetable period setting still preceeds, teachers can't start before the period start even if what is in here is before it.
+                        </SectionAlert>
                         <UFormGroup label="Course Selection">
                         </UFormGroup>
                     </div>

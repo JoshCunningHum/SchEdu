@@ -85,7 +85,7 @@ export class DaySched{
 
         const NumberOfPeriods = Math.floor(this.period_duration / interval);
 
-        this.is_vacant = new Array(NumberOfPeriods).fill(0).map((v, i) => !exclusions?.includes(interval * i + this.period_start) || true);
+        this.is_vacant = new Array(NumberOfPeriods).fill(0).map((v, i) => !exclusions?.includes(interval * i + this.period_start) || false);
 
         // Set TimeTable Settings reference for later
         this.settings = settings;
@@ -96,7 +96,6 @@ export class DaySched{
         let { index_current_vacant: icv, settings: { interval } } = this;
 
         for(let i = 0; i < duration / interval; i++){
-            console.log(icv, i, duration);
             if(icv + i >= this.number_of_periods) {
                 console.log(`Conflict on Period ${(icv + i) * interval + this.period_start}`);
                 return false;

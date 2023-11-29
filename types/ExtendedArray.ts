@@ -1,6 +1,4 @@
 
-// TODO: Finish this later
-
 export abstract class ExtE<T>{
     abstract equals(obj : T) : boolean;
 }

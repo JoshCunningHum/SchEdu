@@ -5,7 +5,7 @@ import { SectionArray, type Section } from "./Section";
 import { Day, DaySched } from "./DaySched";
 
 export class TimetableSettings {
-    interval = 15;
+    interval = 30;
     start = 420; // 7:00 AM
     end = 1140; // 7:00 PM
     exlude_periods: number[] = [720, 750]; // 12:00 , 12:30
@@ -46,15 +46,16 @@ export class Timetable {
 
     settings: TimetableSettings = new TimetableSettings(); // Loads the default settings
     
-    rooms?: RoomArray;
-    courses?: CourseArray;
-    instructors?: InstructorArray;
-    sections?: SectionArray;
+    rooms: RoomArray = new RoomArray();
+    courses: CourseArray = new CourseArray();
+    instructors: InstructorArray = new InstructorArray();
+    sections: SectionArray = new SectionArray();
 
     generate(params: TimetableParams) {
         // We clone the parameters because thats how it is
         const { rooms, courses, instructors, sections, settings } = params;
 
+        // TODO: Put timeout when generation takes too long
         this.rooms = rooms;
         this.courses = courses;
         this.instructors = instructors;
@@ -81,7 +82,7 @@ export class Timetable {
         // }
 
         // Rewritten
-        courses.forEach(c => this.putCourseToRooms(c, rooms));
+        courses.forEach(c => this.putCourseToRooms(c));
 
         // SUGGEST: Same Here, doesn't need to be sorted
         // Get a copy of all instructors and sort the amount of courses they can teach
@@ -100,16 +101,16 @@ export class Timetable {
         // }
 
         // Rewritten
-        instructors.forEach(i => this.putInstructorToRooms(i, rooms, courses));
+        instructors.forEach(i => this.putInstructorToRooms(i));
 
         // Distribute section to classes
-        sections.forEach(s => this.putSectionToRooms(s, courses));
+        sections.forEach(s => this.putSectionToRooms(s));
 
         // [ ]: Validate
         this.checkTimeTableHealth();
     }
 
-    putCourseToRooms(c: Course, rooms: RoomArray) {
+    putCourseToRooms(c: Course) {
         const { settings } = this;
         const { once_prio: once, twice_prio: twice, thrice_prio: thrice, include_sat } = settings;
 
@@ -126,7 +127,7 @@ export class Timetable {
         // Loop through the compatible room types of the course as Course Compatible Roomtype (CCR)
         c.compatible_rooms.forEach(ccr => {
             // Loop through all the rooms and put course to the room that is available and compatible
-            rooms.forEach(r => {
+            this.rooms.forEach(r => {
                 if (classes_offered === 0) return; // Guard clause, not needed daw
                 if (!r.type.equals(ccr)) return;
 
@@ -148,10 +149,15 @@ export class Timetable {
                     while (classes_offered !== 0) {
                         const success = meetings === 1 || scheds.every(s => s.checkConflict(duration));
                         if (success) {
-                            scheds.forEach(s => s.addActivity(c, duration, instance) || console.log("FAILED THO"));
-                            classes_offered--;
-                            instance++;
-                            console.log('Successfully adding activity');
+                            const status = scheds.every(s => s.addActivity(c, duration, instance));
+                            if(status){
+                                classes_offered--;
+                                instance++;
+                            }
+                            else{
+                                console.log('Failed Tho');
+                                break;
+                            }
                         } else break;
                     }
                 })
@@ -160,11 +166,11 @@ export class Timetable {
         })
     }
 
-    putInstructorToRooms(t: Instructor, rooms: RoomArray, courses: CourseArray) {
+    putInstructorToRooms(t: Instructor) {
 
     }
 
-    putSectionToRooms(s: Section, courses: CourseArray) {
+    putSectionToRooms(s: Section) {
 
     }
     print() {

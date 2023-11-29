@@ -76,8 +76,8 @@ onMounted(() => {
 <template>
     <div class="p-2 flex gap-2 h-full">
         <!--Creation Modal -->
-        <UModal v-model="isCreating">
-            <UCard :ui="{ base: 'overflow-visible' }">
+        <UModal v-model="isCreating" :ui="{ width: 'min-w-[500px] max-w-[500px]'}">
+            <UCard :ui="{ base: 'overflow-visible min-w-[500px] w-full' }" class="min-w-[500px]">
                 <template #header>
                     <div>Add a course</div>
                 </template>
@@ -94,36 +94,36 @@ onMounted(() => {
                                 </UFormGroup>
                             </div>
                             <div class="flex justify-between items-center">
-                                <div class="flex gap-1 text-sm w-1/2">
+                                <div class="flex items-center gap-1 w-1/2 text-xs">
 
                                     <label class="text-sm font-medium text-gray-700 dark:text-gray-200">Meetings per week:
                                     </label>
-                                    <div class="flex-grow text-right px-5">{{ meetings }}</div>
+                                    <div class="flex-grow text-right pr-5">{{ meetings }}</div>
                                 </div>
                                 <div class="w-1/2">
                                     <URange size="xs" :min="1" :max="include_sat ? 6 : 5" v-model="meetings" />
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <div class="flex gap-1 text-sm w-1/2">
+                                <div class="flex items-center gap-1 w-1/2 text-xs">
 
                                     <label class="text-sm font-medium text-gray-700 dark:text-gray-200">Minutes per session:
                                     </label>
-                                    <div class="flex-grow text-right px-5">{{ minutes }}</div>
+                                    <div class="flex-grow text-right pr-5">{{ minutes }} <span class="text-xs">({{ minutes / 60 }} hrs)</span></div>
                                 </div>
                                 <div class="w-1/2">
                                     <IntervalSelector :pages="5" v-model="minutes" />
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <div class="flex gap-1 text-sm w-1/2">
+                                <div class="flex items-center gap-1 w-1/2 text-xs">
                                     <label class="text-sm font-medium text-gray-700 dark:text-gray-200">Minutes per Week:
                                     </label>
-                                    <div class="flex-grow text-right px-5">{{ minutes * meetings }}</div>
+                                    <div class="flex-grow text-right pr-5">{{ minutes * meetings }}</div>
                                 </div>
                             </div>
                             <div class="flex justify-between items-center">
-                                <div class="flex gap-1 text-sm w-1/2">
+                                <div class="flex items-center gap-1 w-1/2 text-xs">
 
                                     <label class="text-sm font-medium text-gray-700 dark:text-gray-200">Classes Offered:
                                     </label>
@@ -285,6 +285,9 @@ onMounted(() => {
                                     </template>
 
                                 </USelectMenu>
+                                <SectionAlert class="border-secondary-em text-xs">
+                                    Priority at the topleft-most type down to bottom-rightmost
+                                </SectionAlert>
                                 <TimetableSettingsModalRoomTypesList :list="chosenRoomTypes" />
                             </div>
                         </UFormGroup>

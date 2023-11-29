@@ -54,7 +54,7 @@ export const useTimetableStore = defineStore('timetable', () => {
 
         clear();
 
-        // TODO: Make a better serializer to maintain references
+        // [X]: Make a better serializer to maintain references
         data.value.push(...response.map(t => {
             const dataParsed = t.data ? 
             (JSON.parse(t.data) as TimeTableModel['data']) ||  { params: TimetableBuilder(), sched: new Timetable()} : 
@@ -168,6 +168,7 @@ export const useTimetableStore = defineStore('timetable', () => {
             return;
         }
         selected.value.data.sched.generate(params);
+        change();
     }
 
     return {

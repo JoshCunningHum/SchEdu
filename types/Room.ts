@@ -25,7 +25,6 @@ export class RoomType extends ExtE<RoomType>{
     name: string;
     color: string;
 
-    // TODO: Add a color property or any property for easier discrimination
     constructor({name, color} : RoomTypeParams){
         super();
         this.name = name;
@@ -55,6 +54,7 @@ export class Room extends ExtE<Room>{
     id: string;
     name: string;
     // SUGGEST: But what if a room can be both a lecture and a lab?
+    // Answer: Just set the course to allow those types. If ever a room is a back up room, and 2 courses with no joint room types can use that, create a backup/general room type and add it on those course
     type: RoomType; 
     scheds: DaySchedArray;
 

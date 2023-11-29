@@ -5,5 +5,7 @@
     "nuxtr.defaultPackageManager": "NPM",
     "nuxtr.monorepoMode.DirectoryName": "",
     "nuxtr.openItemsAfterCreation": true,
-    "nuxtr.vueFiles.firstTag": "script"
+    "nuxtr.vueFiles.firstTag": "script",
+    "winddown.breakDurationMinutes": 2,
+    "winddown.minutesTillBreak": 30
 }
