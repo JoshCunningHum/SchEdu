@@ -6,16 +6,18 @@ import { TimetableBuilder, Timetable, type TimetableParams } from "~/types/Timet
 
 interface TimeTableOutput extends Timetable{}
 
+export interface TimetableData {
+    sched: TimeTableOutput,
+    params: TimetableParams
+}
+
 export interface TimeTableModel{
     id: number;
     created: string;
     by: string;
     name: string;
     // HACK: This property is a string inside the database, this is to avoid excessive changes on both the codebase and the database model, once the Timetable Datastructure is finalized, this will be resolve
-    data: {
-        sched: TimeTableOutput, 
-        params: TimetableParams
-    } | null;
+    data: TimetableData | null;
 }
 
 export const useTimetableStore = defineStore('timetable', () => {
