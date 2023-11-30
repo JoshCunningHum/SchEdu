@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import type { _periodFormat } from '~/composables/useMinutesToTime';
+import type { TimetableSettings } from '~/types/Timetable';
 
 const timetableStore = useTimetableStore();
-const settings = computed(() => timetableStore.selected?.data?.params.settings);
+const settings = computed<TimetableSettings | undefined>(() => timetableStore.selected?.data?.params.settings);
 
 const p_start = computed({
   get: () => settings.value?.start || 0,
@@ -41,10 +42,10 @@ const include_sat = computed({
 })
 
 const excluded = computed<Array<_periodFormat>>({
-  get: (): Array<_periodFormat> => settings.value?.exlude_periods.map(v => useMinutesToTime(v)) || [],
+  get: (): Array<_periodFormat> => settings.value?.excluded_periods.map(v => useMinutesToTime(v)) || [],
   set: (v: Array<_periodFormat>) => {
-    settings.value?.exlude_periods.splice(0);
-    settings.value?.exlude_periods.push(...(new Set(v.map(p => p.og))));
+    settings.value?.excluded_periods.splice(0);
+    settings.value?.excluded_periods.push(...(new Set(v.map(p => p.og))));
   }
 });
 
@@ -60,9 +61,9 @@ watch(numOfPeriods, v => {
 
 const removeExclusive = (og : number) => {
   if(settings.value === undefined) return;
-  const i = settings.value.exlude_periods.findIndex(v => v === og);
-  if(i !== -1) settings.value.exlude_periods.splice(i, 1);
-  excluded.value = settings.value.exlude_periods.map(v => useMinutesToTime(v)) || [];
+  const i = settings.value.excluded_periods.findIndex(v => v === og);
+  if(i !== -1) settings.value.excluded_periods.splice(i, 1);
+  excluded.value = settings.value.excluded_periods.map(v => useMinutesToTime(v)) || [];
 }
 
 </script>
@@ -110,7 +111,7 @@ const removeExclusive = (og : number) => {
       <UToggle v-model="include_sat" />
     </UFormGroup>
 
-    <UFormGroup label="Exluded Periods">
+    <UFormGroup label="excluded Periods">
     </UFormGroup>
 
     <div class="flex-grow w-full flex gap-2 min-h-0">

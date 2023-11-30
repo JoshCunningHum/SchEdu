@@ -31,9 +31,9 @@ export class ActivityArray extends Array<Activity>{
 export interface ActivityParams{
     start: number;
     duration: number;
-    sched: DaySched;
-    course?: Course;
-    room?: Room;
+    sched: DaySched | number;
+    course?: Course | string;
+    room?: Room | string;
     instance: number;
 }
 
@@ -75,14 +75,36 @@ export class Activity{
         this.id = useGenID(8);
         this.start_time = start;
         this.duration = duration;
-        this.sched = sched.day;
+        this.sched = typeof sched === 'number' ? sched : sched.day;
         this.instance = instance;
 
-        this.roomID = room?.id;
-        this.courseID = course?.id;
+        this.roomID = typeof room === 'string' ? room : room?.id;
+        this.courseID = typeof course === 'string' ? course : course?.id;
     }
 
     equals(act: Activity){
-        return this.start_time === act.start_time && this.duration === act.duration && this.sched === act.sched;
+        return this.start_time === act.start_time && 
+        this.duration === act.duration && 
+        this.sched === act.sched && 
+        (!this.courseID || !act.courseID || this.courseID === act.courseID) &&
+        (!this.roomID || !act.roomID || this.roomID ===  act.courseID) &&
+        (!this.instructorID || !act.instructorID || this.instructorID === act.instructorID) &&
+        (!this.sectionID || !act.sectionID || this.sectionID === act.sectionID)
+    }
+
+    get clone() : Activity {
+        const clone = new Activity({
+            start: this.start_time,
+            duration: this.duration,
+            course: this.courseID,
+            sched: this.sched,
+            instance: this.instance,
+            room: this.roomID
+        });
+
+        clone.instructorID = this.instructorID
+        clone.sectionID = this.sectionID;
+
+        return clone;
     }
 }

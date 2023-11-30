@@ -4,7 +4,7 @@ import { DaySched, DaySchedArray } from "./DaySched";
 import { Instructor, InstructorArray } from "./Instructor";
 import { Room, RoomArray, RoomType, RoomTypeArray } from "./Room";
 import { Section, SectionArray } from "./Section";
-import { Timetable, type TimetableParams } from "./Timetable";
+import { Timetable, TimetableBuilder, type TimetableParams } from "./Timetable";
 
 // Serializes the timetable data. Can also do parsing
 export class Serializer{
@@ -18,12 +18,16 @@ export class Serializer{
 
         let { rooms, courses, instructors, sections, settings } = data;
         
+        const def_params = TimetableBuilder();
+
         if(!rooms) rooms = new RoomArray();
         if(!courses) courses = new CourseArray();
         if(!instructors) instructors = new InstructorArray();
         if(!sections) sections = new SectionArray();
 
         if(!settings) throw new Error("No settings in the parameters!");
+
+        if(!settings.excluded_periods && !!def_params.settings) settings.excluded_periods = def_params.settings.excluded_periods;
     
         // Reminder: to treat extended arrays in the `data` as arrays, since they are extracted from JSON.parse, they are not an instance of ExtArray and therefore does not have the extra method it has
 

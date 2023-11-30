@@ -63,25 +63,13 @@ export class DaySched{
 
     settings: TimetableSettings;
 
-    get period_duration() : number {
-        return this.period_end - this.period_start;
-    }
-
-    get number_of_periods(){
-        return this.is_vacant.length;
-    }
-
-    get index_current_vacant(){
-        return (this.current_vacant - this.period_start) / this.settings.interval;
-    }
-
     constructor({ day, start, end, settings} : DaySchedParams ){
         this.day = day || Day.SUN;
         this.period_start = start || 0;
         this.period_end = end || 0;
         this.current_vacant = start || 0;
 
-        const {interval, exlude_periods: exclusions } = settings;
+        const {interval, excluded_periods: exclusions } = settings;
 
         const NumberOfPeriods = Math.floor(this.period_duration / interval);
 
@@ -155,6 +143,19 @@ export class DaySched{
 
     equals(sched: DaySched) : boolean {
         return this.day === sched.day;
+    }
+
+
+    get period_duration() : number {
+        return this.period_end - this.period_start;
+    }
+
+    get number_of_periods(){
+        return this.is_vacant.length;
+    }
+
+    get index_current_vacant(){
+        return (this.current_vacant - this.period_start) / this.settings.interval;
     }
 
     PrintVacancy(){

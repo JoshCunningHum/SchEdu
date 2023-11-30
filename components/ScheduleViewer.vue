@@ -92,10 +92,16 @@ const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
                         <USelectMenu :options="categoryValues" v-model="value"> 
                             
                             <template #label>
+                                <span v-if="(value instanceof Room)">
+                                    <span :style="`background: ${value.type.color};`" class="inline-block h-2 w-2 flex-shrink-0 rounded-full"></span>
+                                </span>
                                 {{ category.slice(0, -1) }} - {{ value instanceof Section ? value.id : value instanceof Room || value instanceof Instructor ? value.name : 'None Selected' }}
                             </template>
 
                             <template #option="{ option: value }">
+                                <span v-if="(value instanceof Room)">
+                                    <span :style="`background: ${value.type.color};`" class="inline-block h-2 w-2 flex-shrink-0 rounded-full"></span>
+                                </span>
                                 <span> {{ value instanceof Section ? value.id : value instanceof Room || value instanceof Instructor ? value.name : '' }} </span>
                             </template>
 
@@ -133,9 +139,20 @@ const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
                         <template v-if="!!value && value.scheds && value.scheds.length > i - 1 && value.scheds[i - 1]">
                             
                             <div v-for="a in value.scheds[i-1].activities" 
-                                class="absolute bg-accent top-0 flex items-center justify-center border text-xs jetbrainsmono" 
+                                class="absolute bg-accent top-0 flex items-center justify-center border text-xs jetbrainsmono text-center flex flex-col" 
                                 :style="`width: 96%; left: 2%; top: ${getPosition(a.start_time) - 1}px; height: ${getPosition(a.duration, false) + 1}px;`">
-                                {{ a.course(courses)?.name || 'No Name' }}
+
+                                <span>{{ a.course(courses)?.name }}
+                                    <span v-if="!(value instanceof Section)">
+                                        - {{ a.section(sections)?.id }}
+                                    </span>
+                                </span>
+                                <span v-if="!(value instanceof Instructor)">
+                                    {{ a.instructor(instructors)?.name }}
+                                </span>
+                                <span v-if="!(value instanceof Room)">
+                                    {{ a.room(rooms)?.name }}
+                                </span>
                                 <!-- {{ a.duration || 'No Name' }} -->
                             </div>
 

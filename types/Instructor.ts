@@ -37,7 +37,7 @@ export class Instructor extends ExtE<Instructor>{
         this.name = name;
         this.compatible_courses = compatible_courses;
 
-        this.max_minutes = max_minutes || Number.MAX_SAFE_INTEGER;
+        this.max_minutes = max_minutes || settings.max_instructor_minutes_per_day|| Number.MAX_SAFE_INTEGER;
 
         this.scheds = DaySched.create_week(settings, period_start, period_end);
     }
