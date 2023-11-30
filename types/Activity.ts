@@ -92,19 +92,19 @@ export class Activity{
         (!this.sectionID || !act.sectionID || this.sectionID === act.sectionID)
     }
 
-    get clone() : Activity {
-        const clone = new Activity({
-            start: this.start_time,
-            duration: this.duration,
-            course: this.courseID,
-            sched: this.sched,
-            instance: this.instance,
-            room: this.roomID
-        });
+    // get clone() : Activity {
+    //     const clone = new Activity({
+    //         start: this.start_time,
+    //         duration: this.duration,
+    //         course: this.courseID,
+    //         sched: this.sched,
+    //         instance: this.instance,
+    //         room: this.roomID
+    //     });
 
-        clone.instructorID = this.instructorID
-        clone.sectionID = this.sectionID;
+    //     clone.instructorID = this.instructorID
+    //     clone.sectionID = this.sectionID;
 
-        return clone;
-    }
+    //     return clone;
+    // }
 }

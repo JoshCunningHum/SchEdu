@@ -144,14 +144,14 @@ const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
 
                                 <span>{{ a.course(courses)?.name }}
                                     <span v-if="!(value instanceof Section)">
-                                        - {{ a.section(sections)?.id }}
+                                        - {{ a.section(sections)?.id || '[No Section]'}}
                                     </span>
                                 </span>
                                 <span v-if="!(value instanceof Instructor)">
-                                    {{ a.instructor(instructors)?.name }}
+                                    {{ a.instructor(instructors)?.name || `[No Instructor]`}}
                                 </span>
                                 <span v-if="!(value instanceof Room)">
-                                    {{ a.room(rooms)?.name }}
+                                    {{ a.room(rooms)?.name || `[No Room]`}}
                                 </span>
                                 <!-- {{ a.duration || 'No Name' }} -->
                             </div>

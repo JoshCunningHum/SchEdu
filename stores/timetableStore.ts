@@ -1,24 +1,10 @@
 import { defineStore } from "pinia";
 import { useDeepToRaw } from "~/composables/useDeepToRaw";
+import { TimetableControl } from "~/controllers/TimetableControl";
 import type { Database } from "~/database.types";
 import { Serializer } from "~/types/Serializer";
-import { TimetableBuilder, Timetable, type TimetableParams } from "~/types/Timetable";
+import { TimetableBuilder, Timetable, type TimeTableModel } from "~/types/Timetable";
 
-interface TimeTableOutput extends Timetable{}
-
-export interface TimetableData {
-    sched: TimeTableOutput,
-    params: TimetableParams
-}
-
-export interface TimeTableModel{
-    id: number;
-    created: string;
-    by: string;
-    name: string;
-    // HACK: This property is a string inside the database, this is to avoid excessive changes on both the codebase and the database model, once the Timetable Datastructure is finalized, this will be resolve
-    data: TimetableData | null;
-}
 
 export const useTimetableStore = defineStore('timetable', () => {
     const supabase = useSupabaseClient<Database>();
@@ -47,46 +33,19 @@ export const useTimetableStore = defineStore('timetable', () => {
 
     const sync = async () => {
 
-        const { data: response, error } = await supabase
-            .from('timetables')
-            .select()
-            .eq('by', session.idToken.value);
-
-        if(error) return;
-
         clear();
 
         // [X]: Make a better serializer to maintain references
-        data.value.push(...response.map(t => {
-            const dataParsed = t.data ? 
-            (JSON.parse(t.data) as TimeTableModel['data']) ||  { params: TimetableBuilder(), sched: new Timetable()} : 
-            { params: TimetableBuilder(), sched: new Timetable()};
-            
-            const sched = Serializer.fix(dataParsed.sched) || new Timetable();
-            const params = Serializer.extract(dataParsed.params) || TimetableBuilder();
-
-            return <TimeTableModel>{
-                id: t.id,
-                created: t.created || '',
-                by: t.by || '',
-                name: t.name,
-                data: {
-                    sched,
-                    params
-                }
-            }
-        }));
+        data.value.push(...await TimetableControl.fetchAll());
 
     }
 
     const create = async (name: string) => {
         if(!tryRequest()) return;
 
-        const { error } = await supabase
-            .from('timetables')
-            .insert({name: name, by: session.idToken.value});
+        const status = await TimetableControl.create(name);
 
-        if(error) return;
+        if(!status) return;
 
         await sync();
 
@@ -96,12 +55,8 @@ export const useTimetableStore = defineStore('timetable', () => {
     const remove = async (...ids: TimeTableModel['id'][]) => {
         if(!tryRequest()) return;
         
-        const { error } = await supabase
-            .from('timetables')
-            .delete()
-            .in('id', ids);
-
-        if(error) return;
+        const status = await TimetableControl.remove(ids);
+        if(!status) return;
 
         await sync();
 
@@ -115,11 +70,8 @@ export const useTimetableStore = defineStore('timetable', () => {
 
         if(!source) return;
 
-        const { error } = await supabase
-            .from('timetables')
-            .insert({name: source.name, by: source.by, data: JSON.stringify(source.data)});
-
-        if(error) return;
+        const status = await TimetableControl.duplicate(source);
+        if(!status) return;
 
         await sync();
 
@@ -136,15 +88,12 @@ export const useTimetableStore = defineStore('timetable', () => {
 
         if(data === null) return false;
 
-        const { error } = await supabase
-            .from('timetables')
-            .update({ data: JSON.stringify(data), created: new Date().toISOString()})
-            .eq('id', id);
+        const status = await TimetableControl.updateData(id, data);
 
         concludeRequest();
 
         // TODO: Show modal when error on udpating the table
-        if(error) return false;
+        if(!status) return false;
 
         hasChanges.value = false;
         return true;

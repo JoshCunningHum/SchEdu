@@ -85,7 +85,7 @@ export class DaySched{
 
         for(let i = 0; i < duration / interval; i++){
             if(icv + i >= this.number_of_periods) {
-                console.log(`Conflict on Period ${(icv + i) * interval + this.period_start}`);
+                console.log(`%cConflict on Period ${(icv + i) * interval + this.period_start}`, 'color: orange;');
                 return false;
             }
             if(!this.is_vacant[icv + i]){
@@ -97,7 +97,7 @@ export class DaySched{
         return true;
     }
 
-    addActivity(course: Course, duration: number, instance: number){
+    addActivity(course: Course, duration: number, instance: number, room: Room){
         let { index_current_vacant: icv, settings: { interval } } = this;
 
         for(let i = 0; i < duration / interval; i++){
@@ -117,6 +117,7 @@ export class DaySched{
             instance: instance
         });
 
+        act.roomID = room.id;
         course.course_classes.add(act);
 
         icv = this.index_current_vacant; // getter

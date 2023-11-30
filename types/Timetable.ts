@@ -5,6 +5,22 @@ import { SectionArray, type Section } from "./Section";
 import { Day, DaySched } from "./DaySched";
 import type { Activity } from "./Activity";
 
+export interface TimeTableOutput extends Timetable{}
+
+export interface TimetableData {
+    sched: TimeTableOutput,
+    params: TimetableParams
+}
+
+export interface TimeTableModel{
+    id: number;
+    created: string;
+    by: string;
+    name: string;
+    // HACK: This property is a string inside the database, this is to avoid excessive changes on both the codebase and the database model, once the Timetable Datastructure is finalized, this will be resolve
+    data: TimetableData | null;
+}
+
 export class TimetableSettings {
     interval = 30;
     start = 420; // 7:00 AM
@@ -150,7 +166,7 @@ export class Timetable {
                     while (classes_offered !== 0) {
                         const success = meetings === 1 || scheds.every(s => s.checkConflict(duration));
                         if (success) {
-                            const status = scheds.every(s => s.addActivity(c, duration, instance));
+                            const status = scheds.every(s => s.addActivity(c, duration, instance, r));
                             if(status){
                                 classes_offered--;
                                 instance++;
@@ -246,14 +262,29 @@ export class Timetable {
 
     putSectionToRooms(s: Section) {
         // return;
+        const DEV_MODE = true;
+
+        if(DEV_MODE) console.log(`%c--- Putting Section: ---`, 'color:yellow;', s);
+
         s.section_courses.forEach(c => {
             let { weekly_meetings: meetings } = c;
+
+            if(DEV_MODE) console.log(`To course: `, c);
+
             c.course_classes.forEach(a => {
-                if(meetings <= 0) return; // Guard Clause
+
+                console.log(`Attempt to add activity:`, a);
+
                 if(!a.sectionID && meetings > 0){
                     a.sectionID = s.id;
-                    s.scheds.find(sc => sc.day === a.sched)?.addExistingActivity(a);
+                    s.scheds[a.sched - 1].addExistingActivity(a);
                     meetings--;
+                    if(DEV_MODE) console.log(`%cSuccessfully Added Activity`, 'color:green;');
+                }else if(DEV_MODE){
+                    console.log(`%cFailed Tho: %c${[
+                        {label: `Act has a section`, value: !a.sectionID},
+                        {label: `Meeting is now less than 0`, value: meetings > 0},
+                    ].filter(status => !status.value).map(status => status.label).join(' | ')}`, `color:red;`, `color: orange;`);
                 }
             })
         })
