@@ -2,8 +2,7 @@ import { defineStore } from 'pinia'
 import { Instructor, InstructorArray } from '~/types/Instructor';
 import { useCourseStore } from './courseStore';
 import { CourseArray } from '~/types/Course';
-import type { TimeTableModel } from './timetableStore';
-import { TimetableSettings, type TimetableParams } from '~/types/Timetable';
+import { TimetableSettings, type TimetableParams, type TimeTableModel } from '~/types/Timetable';
 
 
 export const useTeacherStore = defineStore('teacherStore', () => {
