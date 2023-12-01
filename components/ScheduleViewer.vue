@@ -89,7 +89,7 @@ const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
                         <USelectMenu :options="categoryList" v-model="category"/>
                     </div>
                     <div class="w-52">
-                        <USelectMenu :options="categoryValues" v-model="value"> 
+                        <USelectMenu :options="categoryValues" v-model="value" searchable :search-attributes="[(value instanceof Section) ? 'id' : 'name']"> 
                             
                             <template #label>
                                 <span v-if="(value instanceof Room)">
@@ -103,6 +103,10 @@ const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
                                     <span :style="`background: ${value.type.color};`" class="inline-block h-2 w-2 flex-shrink-0 rounded-full"></span>
                                 </span>
                                 <span> {{ value instanceof Section ? value.id : value instanceof Room || value instanceof Instructor ? value.name : '' }} </span>
+                            </template>
+
+                            <template #option-empty="{ query }">
+                                <span class="text-sm text-secondary-em">"{{ query }}" not found</span>
                             </template>
 
                         </USelectMenu>

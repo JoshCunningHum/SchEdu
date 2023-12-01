@@ -262,7 +262,7 @@ export class Timetable {
 
     putSectionToRooms(s: Section) {
         // return;
-        const DEV_MODE = true;
+        const DEV_MODE = false;
 
         if(DEV_MODE) console.log(`%c--- Putting Section: ---`, 'color:yellow;', s);
 

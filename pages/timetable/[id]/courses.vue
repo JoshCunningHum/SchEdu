@@ -18,7 +18,7 @@ const include_sat = computed(() => settingsStore.settings?.include_sat);
 const isCreating = ref(false);
 const name = ref('');
 const meetings = ref(2);
-const minutes = ref(interval.value || 15);
+const minutes = ref(interval.value * 4 || 60);
 const offered = ref<number>();
 
 watch(interval, v => minutes.value = v);

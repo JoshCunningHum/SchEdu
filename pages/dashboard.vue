@@ -171,7 +171,7 @@ const timetableStore = useTimetableStore();
 
 // Acquire timetables from database
 const isAcquired = ref(false);
-DashboardControl.acquireTimeTables().then(() => (isAcquired.value = true));
+timetableStore.sync().then(() => (isAcquired.value = true));
 const timeTables = computed(() => timetableStore.data);
 
 const timeTablesFiltered = computed(() => {

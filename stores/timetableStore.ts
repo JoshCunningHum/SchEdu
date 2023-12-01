@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useDeepToRaw } from "~/composables/useDeepToRaw";
+import { DashboardControl } from "~/controllers/DashboardControl";
 import { TimetableControl } from "~/controllers/TimetableControl";
 import type { Database } from "~/database.types";
 import { Serializer } from "~/types/Serializer";
@@ -7,8 +8,6 @@ import { TimetableBuilder, Timetable, type TimeTableModel } from "~/types/Timeta
 
 
 export const useTimetableStore = defineStore('timetable', () => {
-    const supabase = useSupabaseClient<Database>();
-    const session = useSessionStatus();
     const isRequesting = ref(false);
 
     const data = ref(new Array<TimeTableModel>());
@@ -36,14 +35,14 @@ export const useTimetableStore = defineStore('timetable', () => {
         clear();
 
         // [X]: Make a better serializer to maintain references
-        data.value.push(...await TimetableControl.fetchAll());
+        data.value.push(...await DashboardControl.fetchAll());
 
     }
 
     const create = async (name: string) => {
         if(!tryRequest()) return;
 
-        const status = await TimetableControl.create(name);
+        const status = await DashboardControl.create(name);
 
         if(!status) return;
 
@@ -55,7 +54,7 @@ export const useTimetableStore = defineStore('timetable', () => {
     const remove = async (...ids: TimeTableModel['id'][]) => {
         if(!tryRequest()) return;
         
-        const status = await TimetableControl.remove(ids);
+        const status = await DashboardControl.remove(ids);
         if(!status) return;
 
         await sync();
@@ -70,7 +69,7 @@ export const useTimetableStore = defineStore('timetable', () => {
 
         if(!source) return;
 
-        const status = await TimetableControl.duplicate(source);
+        const status = await DashboardControl.duplicate(source);
         if(!status) return;
 
         await sync();
@@ -109,16 +108,10 @@ export const useTimetableStore = defineStore('timetable', () => {
 
     const generate = () => {
         console.log('Attempt to generate...');
-        if(!selected.value || !selected.value.data) return;
+        if(!selected.value) return;
 
-        // TODO: Add warning for any errors in the input
-        const params = Serializer.extract(selected.value.data.params);
-        console.log(`Unwrapped Parameters: `, params);
-        if(params === null || params === undefined){
-            console.error("Something wrong when unwrapping the parameters");
-            return;
-        }
-        selected.value.data.sched.generate(params);
+        TimetableControl.generate(selected.value);
+
         change();
     }
 
