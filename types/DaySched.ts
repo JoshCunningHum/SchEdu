@@ -1,7 +1,9 @@
 import { Activity, ActivityArray } from "./Activity";
-import type { Room } from "./Room";
+import { Room } from "./Room";
 import type { Course } from './Course';
 import type { TimetableSettings } from "./Timetable";
+import { Instructor } from "./Instructor";
+import { Section } from "./Section";
 
 export enum Day{
     SUN,
@@ -56,6 +58,7 @@ export class DaySched{
     day: Day;
     period_start: number;
     period_end: number;
+    total_occupied_minutes = 0;
     activities: ActivityArray = new ActivityArray();
     is_vacant: boolean[];
     /** This serves as the TOP of the STACK of classes within the schedule */
@@ -121,6 +124,7 @@ export class DaySched{
         course.course_classes.add(act);
 
         icv = this.index_current_vacant; // getter
+        this.total_occupied_minutes += duration;
         for(let i = 0; i < duration / interval; i++) this.is_vacant[icv + i] = false;
         this.current_vacant += duration;
         return true;
@@ -140,6 +144,14 @@ export class DaySched{
         let current_index = (start_time - period_start) / interval;
         for(let i = 0; i < duration / interval; i++) if(current_index + i >= this.number_of_periods || !this.is_vacant[current_index + i]) return false; // haha
         return true;
+    }
+
+    checkViolation(r : Room | Instructor | Section, duration: number){
+        const max = r instanceof Room ? this.settings.max_room_minutes_per_day : 
+                    r instanceof Instructor ? this.settings.max_instructor_minutes_per_day :
+                    r instanceof Section ? this.settings.max_student_minutes_per_day : -1;
+
+        return this.total_occupied_minutes + duration <= max;
     }
 
     equals(sched: DaySched) : boolean {

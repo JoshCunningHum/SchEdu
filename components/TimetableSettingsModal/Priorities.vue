@@ -50,16 +50,18 @@ const setToDefault = () => {
       <!-- Once Per Week -->
       <div class="flex justify-center max-w-fit">
         <UFormGroup label="Once per week">
-          <draggable v-model="once" class="_v___" :component-data="{
-            tag: 'div',
-            type: 'transition-group',
-            name: 'flip-list'
-          }" :="{
-  animation: 200,
-  group: 'once',
-  disabled: false,
-  ghostClass: 'ghost'
-}" tag="transition-group">
+          <draggable v-model="once" class="_v___" 
+              :component-data="{
+                tag: 'div',
+                type: 'transition-group',
+                name: 'flip-list'
+              }" :="{
+                  animation: 200,
+                  group: 'once',
+                  disabled: false,
+                  ghostClass: 'ghost'
+                }" 
+              tag="transition-group">
             <template #item="{ element: el }">
               <div class="v_v_item bg-accent" @click="el.fixed = !el.fixed">{{ Day[el] }}</div>
             </template>

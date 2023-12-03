@@ -36,8 +36,8 @@ export class TimetableSettings {
 
     // Constraints
     max_instructor_minutes_per_day = 480;
-    max_student_minutes_per_day = 480;
-    max_room_minutes_per_day = 480;
+    max_student_minutes_per_day = Number.MAX_SAFE_INTEGER;
+    max_room_minutes_per_day = Number.MAX_SAFE_INTEGER;
     max_consecutive_minutes = 240; // TODO: MAX_CONSEC_MINUTES
 }
 
@@ -164,7 +164,7 @@ export class Timetable {
                     if(DEV_MODE) console.log(`Current Priority: ${p} has these scheds: `, scheds);
 
                     while (classes_offered !== 0) {
-                        const success = meetings === 1 || scheds.every(s => s.checkConflict(duration));
+                        const success = (meetings === 1 || scheds.every(s => s.checkConflict(duration))) && scheds.every(s => s.checkViolation(r, duration));
                         if (success) {
                             const status = scheds.every(s => s.addActivity(c, duration, instance, r));
                             if(status){
@@ -228,13 +228,15 @@ export class Timetable {
                         const inst_vacant = inst_scheds.every((sc, sci) => sc.checkVacant(pair_acts[sci].start_time, pair_acts[sci].duration));
                         const acts_equal_course = pair_acts.every(p => p.courseID === tcc.id);
                         const inst_have_minutes = t.addMinutes(tcc.minutes);
+                        const follows_constraint = inst_scheds.every((sc, sci) => sc.checkViolation(t, pair_acts[sci].duration));
 
                         if(
                             acts_exists && // Make sure all pair activities are present
                             acts_no_instructor && // Make sure all pair activities have no assigned instructor
                             inst_vacant &&
                             acts_equal_course &&
-                            inst_have_minutes
+                            inst_have_minutes &&
+                            follows_constraint
                         ){
                             pair_acts.forEach(p => p.instructorID = t.id);
                             // Set activity instructor and clone it
@@ -248,7 +250,8 @@ export class Timetable {
                                 {label: `Acts has instructor`, value: acts_no_instructor},
                                 {label: `Instructor is not vacant`, value: inst_vacant},
                                 {label: `Acts not the same course`, value: acts_equal_course},
-                                {label: `Instructor has no minutes`, value: inst_have_minutes}
+                                {label: `Instructor has no minutes`, value: inst_have_minutes},
+                                {label: `Doesn't follow constraints`, value: follows_constraint}
                             ].filter(status => !status.value).map(status => status.label).join(' | ')}`, `color:red;`, `color: orange;`);
                         }
 
@@ -274,16 +277,30 @@ export class Timetable {
             c.course_classes.forEach(a => {
 
                 console.log(`Attempt to add activity:`, a);
+                const sched = s.scheds[a.sched - 1];
+                if(!sched) return;
 
-                if(!a.sectionID && meetings > 0){
+                const hasNoSection = !a.sectionID,
+                    hasAvailableMeetings = meetings > 0,
+                    hasNoConflict = s.scheds[a.sched - 1].checkVacant(a.start_time, a.duration),
+                    hasNoViolation = sched.checkViolation(s, a.duration);
+
+                if(
+                    hasNoSection &&
+                    hasAvailableMeetings &&
+                    hasNoConflict &&
+                    hasNoViolation    
+                ){
                     a.sectionID = s.id;
                     s.scheds[a.sched - 1].addExistingActivity(a);
                     meetings--;
                     if(DEV_MODE) console.log(`%cSuccessfully Added Activity`, 'color:green;');
                 }else if(DEV_MODE){
                     console.log(`%cFailed Tho: %c${[
-                        {label: `Act has a section`, value: !a.sectionID},
-                        {label: `Meeting is now less than 0`, value: meetings > 0},
+                        {label: `Act has a section`, value: hasNoSection},
+                        {label: `Meeting is now less than 0`, value: hasAvailableMeetings},
+                        {label: `Conflict on vacancy`, value: hasNoConflict},
+                        {label: `Violation`, value: hasNoViolation}
                     ].filter(status => !status.value).map(status => status.label).join(' | ')}`, `color:red;`, `color: orange;`);
                 }
             })
