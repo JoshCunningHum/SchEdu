@@ -61,7 +61,7 @@
                 </div>
                 <!-- Timetable Viewer -->
                 <div v-else class="w-full h-full flex flex-col gap-1 p-2"> 
-                    <div :class="`flex justify-end ${isFirefox ? '' : 'pr-5'}`">
+                    <div :class="`flex justify-end`">
                         <UButton @click="timeTableStore.generate()">Generate</UButton>
                     </div>
                     <ScheduleViewer class="flex-grow" />
@@ -138,8 +138,6 @@ const updateData = async () => {
     if(!result) alert(`Something wen't wrong when updating... Please try again later.`)
     isUpdatingData.value = false;
 }
-
-const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
 
 </script>
 

@@ -72,9 +72,6 @@ const getPosition = (minutes: number, isStart: boolean = true) : number => {
     return applied_offset + periodsCovered * heightPerPeriod.value;
 }
 
-// Disable zooming on firefox
-const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
-
 </script>
 
 <template>
@@ -169,8 +166,9 @@ const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
 
         </div>
         <!-- Slider for scaling -->
-        <div class="h-full w-4" v-if="!isFirefox">
-            <input type="range" min="1" max="100" v-model="zoomRaw" class="vertical-slider h-full w-4 rounded-full" />
+        <div class="h-full w-4 py-2">
+            <!-- <input type="range" min="1" max="100" v-model="zoomRaw" class="vertical-slider h-full w-4 rounded-full" /> -->
+            <VerticalSlider v-model="zoomRaw" />
         </div>
     </div>
 </template>
@@ -193,108 +191,4 @@ const isFirefox = computed(() => navigator.userAgent.indexOf('Firefox') !== -1);
 
     font-family: "Jetbrains Mono";
 }
-
-.vertical-slider {
-    appearance: slider-vertical;
-    -moz-appearance: slider-vertical;
-    -webkit-appearance: slider-vertical;
-}
-
-// .vertical-range::-webkit-slider-runnable-track{
-//     @apply rounded-full;
-// }
-
-// input[type=range].vertical-range {
-//   width: 100%;
-//   margin: 5px 0;
-//   background-color: transparent;
-//    appearance: slider-vertical;
-//    -moz-appearance: slider-vertical;
-//    -webkit-appearance: slider-vertical;
-// }
-
-
-// input[type=range].vertical-range:focus {
-//   outline: none;
-// }
-// input[type=range].vertical-range::-webkit-slider-runnable-track {
-//   background: #171717;
-//   border: 1px solid rgba(1, 1, 1, 0.2);
-//   border-radius: 25px;
-//   width: 100%;
-//   height: 0px;
-//   cursor: pointer;
-// }
-// input[type=range].vertical-range::-webkit-slider-thumb {
-//   margin-top: -6px;
-//   width: 10px;
-//   height: 10px;
-//   background: #171717;
-//   border: 2px solid #3fd398;
-//   border-radius: 50px;
-//   cursor: pointer;
-//   -webkit-appearance: none
-// }
-// input[type=range].vertical-range:focus::-webkit-slider-runnable-track {
-//   background: #3d3d3d;
-// }
-// input[type=range].vertical-range::-moz-range-track {
-//   background: #171717;
-//   border: 1px solid rgba(1, 1, 1, 0.2);
-//   width: 100%;
-//   height: 0px;
-//   cursor: pointer;
-// }
-// input[type=range].vertical-range::-moz-range-thumb {
-//   width: 10px;
-//   height: 10px;
-//   background: #171717;
-//   border: 2px solid #3fd398;
-//   border-radius: 50px;
-//   cursor: pointer;
-// }
-// input[type=range].vertical-range::-ms-track {
-//   background: transparent;
-//   border-color: transparent;
-//   border-width: 5px 0;
-//   color: transparent;
-//   width: 100%;
-//   height: 0px;
-//   cursor: pointer;
-// }
-// input[type=range].vertical-range::-ms-fill-lower {
-//   background: #000000;
-//   border: 1px solid rgba(1, 1, 1, 0.2);
-//   border-radius: 50px;
-// }
-// input[type=range].vertical-range::-ms-fill-upper {
-//   background: #171717;
-//   border: 1px solid rgba(1, 1, 1, 0.2);
-//   border-radius: 50px;
-// }
-// input[type=range].vertical-range::-ms-thumb {
-//   width: 10px;
-//   height: 10px;
-//   background: #171717;
-//   border: 2px solid #3fd398;
-//   border-radius: 50px;
-//   cursor: pointer;
-//   margin-top: 0px;
-//   /*Needed to keep the Edge thumb centred*/
-// }
-// input[type=range].vertical-range:focus::-ms-fill-lower {
-//   background: #171717;
-// }
-// input[type=range].vertical-range:focus::-ms-fill-upper {
-//   background: #3d3d3d;
-// }
-// /*TODO: Use one of the selectors from https://stackoverflow.com/a/20541859/7077589 and figure out
-// how to remove the virtical space around the range input in IE*/
-// @supports (-ms-ime-align:auto) {
-//   /* Pre-Chromium Edge only styles, selector taken from hhttps://stackoverflow.com/a/32202953/7077589 */
-//   input[type=range].vertical-range {
-//     margin: 0;
-//     /*Edge starts the margin from the thumb, not the track as other browsers do*/
-//   }
-// }
 </style>
