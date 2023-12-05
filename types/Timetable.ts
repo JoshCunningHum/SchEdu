@@ -133,6 +133,9 @@ export class Timetable {
 
         let { classes_offered, weekly_meetings: meetings } = c, instance = 1, duration = c.minutes / c.weekly_meetings;
         
+        // classes offered now depends on how many sections needs that course
+        classes_offered = this.sections.reduce((acc: number, s: Section) => acc += s.section_courses.filter(co => co.equals(c)).length, 0)
+
         // Can't write the orginal, too long, that's what she said
 
         const quadrice = once.map(([p]) => once.flat().filter(a => a !== p));

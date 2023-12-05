@@ -19,13 +19,12 @@ const isCreating = ref(false);
 const name = ref('');
 const meetings = ref(2);
 const minutes = ref(interval.value * 4 || 60);
-const offered = ref<number>();
 
 watch(interval, v => minutes.value = v);
 
 const addCourse = () => {
-    if (!name.value || !offered.value || offered.value < 1) return;
-    courseStore.addCourse(name.value, meetings.value, offered.value, minutes.value * meetings.value);
+    if (!name.value) return;
+    courseStore.addCourse(name.value, meetings.value, 0, minutes.value * meetings.value);
     name.value = '';
     isCreating.value = false;
 }
@@ -83,9 +82,7 @@ onMounted(() => {
                 </template>
 
                 <div>
-                    <UFormGroup :help="!name ? 'Room needs a name' :
-                        !offered && offered !== 0 ? 'Enter the number of classes offered' :
-                            offered < 1 ? 'Number of classes offered should be greater than 0' : undefined">
+                    <UFormGroup :help="!name ? 'Room needs a name' : undefined">
                         <div class="flex flex-col gap-2">
 
                             <div>
@@ -122,16 +119,6 @@ onMounted(() => {
                                     <div class="flex-grow text-right pr-5">{{ minutes * meetings }}</div>
                                 </div>
                             </div>
-                            <div class="flex justify-between items-center">
-                                <div class="flex items-center gap-1 w-1/2 text-xs">
-
-                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-200">Classes Offered:
-                                    </label>
-                                </div>  
-                                <div class="w-1/2">
-                                    <UInput :tabindex="2" v-model="offered" type="number" />
-                                </div>
-                            </div>
 
                         </div>
                     </UFormGroup>
@@ -139,7 +126,7 @@ onMounted(() => {
 
                 <template #footer>
                     <div class="flex gap-2 justify-end">
-                        <UButton :disabled="!name || !offered || offered < 1" @click="addCourse">Add</UButton>
+                        <UButton :disabled="!name" @click="addCourse">Add</UButton>
                     </div>
                 </template>
             </UCard>
@@ -229,16 +216,6 @@ onMounted(() => {
                                 <label class="text-sm font-medium text-gray-700 dark:text-gray-200">Minutes per Week:
                                 </label>
                                 <div class="flex-grow text-right px-5">{{ chosen.minutes }}</div>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div class="flex gap-1 text-sm w-1/2">
-
-                                <label class="text-sm font-medium text-gray-700 dark:text-gray-200">Classes Offered:
-                                </label>
-                            </div>
-                            <div class="w-1/2">
-                                <UInput v-model="chosen.classes_offered" type="number" />
                             </div>
                         </div>
 

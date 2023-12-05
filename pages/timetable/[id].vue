@@ -2,6 +2,8 @@
     <UContainer class="flex flex-col flex-grow pb-6 gap-4 w-full h-full min-h-0">
         <!-- Timetable Setting Modal -->
         <TimetableSettingsModal v-model="isOpenSettings" />
+        <!-- Customizer -->
+        <Customizer v-model="isCustomizing" />
 
         <!---->
         <div class="h-32 flex gap-6" style="min-height: 8rem;">
@@ -62,7 +64,10 @@
                 <!-- Timetable Viewer -->
                 <div v-else class="w-full h-full flex flex-col gap-1 p-2"> 
                     <div :class="`flex justify-end`">
-                        <UButton @click="timeTableStore.generate()">Generate</UButton>
+                        <UButtonGroup>
+                            <UButton @click="isCustomizing = true" color="white" >Customize</UButton>
+                            <UButton @click="timeTableStore.generate()">Generate</UButton>
+                        </UButtonGroup>
                     </div>
                     <ScheduleViewer class="flex-grow" />
                 </div>
@@ -90,9 +95,9 @@ const paramlinks = [
         shortcuts: ['T']
     },
     {
-        label: 'Teachers',
-        to: { name: 'timetable-id-teachers', params: { id: id }},
-        shortcuts: ['Z']
+        label: 'Rooms',
+        to: { name: 'timetable-id-rooms', params: { id: id }},
+        shortcuts: ['C']
     },
     {
         label: 'Courses',
@@ -100,9 +105,9 @@ const paramlinks = [
         shortcuts: ['X']
     },
     {
-        label: 'Rooms',
-        to: { name: 'timetable-id-rooms', params: { id: id }},
-        shortcuts: ['C']
+        label: 'Teachers',
+        to: { name: 'timetable-id-teachers', params: { id: id }},
+        shortcuts: ['Z']
     },
     {
         label: 'Sections',
@@ -130,6 +135,7 @@ const formatter = date => useUseSTDTimeFormat(date);
 // Handle Timetable settings
 const isOpenSettings = ref(false);
 const isUpdatingData = ref(false);
+const isCustomizing = ref(false);
 
 // Update Timetable
 const updateData = async () => {

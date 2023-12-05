@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import { number } from 'yup';
-
 
 const props = defineProps({
   modelValue: {
-    type: Number
+    type: Number,
+    default: 0
   },
   min: {
     type: Number,
@@ -25,7 +24,7 @@ const emit = defineEmits<{
 }>();
 
 const value = computed({
-  get: () => props.modelValue || 0,
+  get: () => props.modelValue,
   set: (v: number) => emit('update:modelValue', v)
 });
 
@@ -38,6 +37,21 @@ const thumb = ref<InstanceType<typeof HTMLDivElement>>(),
 const { pressed } = useMousePressed({ target: thumb });
 const { elementY: top, elementHeight: height } = useMouseInElement(track);
 
+const valToHeight = (v: number) : number => {
+  const perc = v / range.value;
+  const ny = perc * height.value;
+
+  return ny;
+}
+
+watchImmediate(value, v => {
+  if(!thumb.value || !progress.value) return;
+
+  const ny = valToHeight(v);
+  thumb.value.style.top = `${ny}px`;
+  progress.value.style.height = `${ny}px`;
+})
+
 whenever(top, () => {
   if(!thumb.value || !pressed.value || !progress.value) return;
 
@@ -47,8 +61,6 @@ whenever(top, () => {
   const rounded = Math.ceil(perc * steps);
   const ny = (rounded / steps) * height.value;
 
-  thumb.value.style.top = `${ny}px`;
-  progress.value.style.height = `${ny}px`;
   value.value = props.min + (ny / height.value) * range.value;
 })
 

@@ -5,9 +5,9 @@
                 <Logo wide class="flex" />
             </div>
             <div class="text-sm lg:text-lg text-center lg:text-start">
-                Where scheduling needs no education... what?
+                Keep track of schedules, classes, rooms, staff, students and more.
                 <div class="lg:pl-16">
-                    Lorem ipsum dolor sit, You can't schedule? you better quit
+                    Generate timetables tailored to your needs
                 </div>
             </div>
         </UContainer>

@@ -4,7 +4,7 @@
             <span>S</span>
             <span class="text-accent">E</span>
         </div>
-        <div v-else-if="isWide" class="max-w-min">
+        <div v-else-if="isWide" class="max-w-min jetbrainsmono">
             <div class="max-w-min" :style="`line-height: ${fontSize};`">SCH<span class="text-accent">EDU</span>LE</div>
             <div class="max-w-min text-accent" :style="`line-height: ${fontSize}; margin-top: -10px`">&nbsp;&nbsp;&nbsp;CATION</div>
         </div>
@@ -51,8 +51,8 @@ const goHome = () => {
 </script>
 
 <style lang="scss" scoped>
-#root {
-    font-family: 'JetBrains Mono';
+#root > div{
+    font-family: 'JetBrains Mono' !important;
     font-weight: 600;
 }
 </style>
