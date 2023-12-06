@@ -18,7 +18,6 @@ export interface SectionParams{
 export class Section extends ExtE<Section>{
     id: string;
     // year_level: number; // useless for some reason
-
     // From: List<Integer> - probably stores the ID of the courses
     section_courses : CourseArray;
     scheds: DaySchedArray;

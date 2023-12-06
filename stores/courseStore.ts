@@ -13,7 +13,6 @@ export const useCourseStore = defineStore('courseStore', () => {
     courses.value.create(Course, {
       name,
       meetings,
-      classes_offered: classes,
       minutes,
       room_types: settingsStore.roomTypes ? new RoomTypeArray(...settingsStore.roomTypes) : new RoomTypeArray()
     });

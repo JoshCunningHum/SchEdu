@@ -131,10 +131,10 @@ export class Timetable {
         const { settings } = this, DEV_MODE = false;
         const { once_prio: once, twice_prio: twice, thrice_prio: thrice, include_sat } = settings;
 
-        let { classes_offered, weekly_meetings: meetings } = c, instance = 1, duration = c.minutes / c.weekly_meetings;
+        let { weekly_meetings: meetings } = c, instance = 1, duration = c.minutes / c.weekly_meetings;
         
         // classes offered now depends on how many sections needs that course
-        classes_offered = this.sections.reduce((acc: number, s: Section) => acc += s.section_courses.filter(co => co.equals(c)).length, 0)
+        let classes_offered = this.sections.reduce((acc: number, s: Section) => acc += s.section_courses.some(co => co.equals(c)) ? 1 : 0, 0)
 
         // Can't write the orginal, too long, that's what she said
 

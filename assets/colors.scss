@@ -84,6 +84,11 @@ $color_maps : (
             color: $emph;
         }
     }
+
+    .bg-#{$key}-em {
+        background-color: $emph;
+        color: $opp;
+    }
 }
 
 

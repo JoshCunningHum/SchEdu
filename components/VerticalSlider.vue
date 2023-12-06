@@ -44,13 +44,7 @@ const valToHeight = (v: number) : number => {
   return ny;
 }
 
-watchImmediate(value, v => {
-  if(!thumb.value || !progress.value) return;
-
-  const ny = valToHeight(v);
-  thumb.value.style.top = `${ny}px`;
-  progress.value.style.height = `${ny}px`;
-})
+const tops = computed(() => valToHeight(value.value));
 
 whenever(top, () => {
   if(!thumb.value || !pressed.value || !progress.value) return;
@@ -70,8 +64,8 @@ whenever(top, () => {
   <div class="h-full w-4 flex justify-center relative pb-1 select-none">
       <div class="rounded-full bg-primary h-full cursor-pointer" style="width: 2px;" ref="track">
       </div>
-      <div class="absolute rounded-full bg-accent" style="width: 2px;" ref="progress"></div>
-      <div class="cursor-pointer w-2 h-2 rounded-full bg-primary absolute border border-accent mx-auto" ref="thumb"></div>
+      <div class="absolute rounded-full bg-accent" :style="`height: ${tops}px; width: 2px;`" ref="progress"></div>
+      <div class="cursor-pointer w-2 h-2 rounded-full bg-primary absolute border border-accent mx-auto" :style="`top: ${tops}px;`" ref="thumb"></div>
   </div>
 </template>
 

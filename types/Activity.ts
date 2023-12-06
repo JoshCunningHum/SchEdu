@@ -92,19 +92,30 @@ export class Activity{
         (!this.sectionID || !act.sectionID || this.sectionID === act.sectionID)
     }
 
-    // get clone() : Activity {
-    //     const clone = new Activity({
-    //         start: this.start_time,
-    //         duration: this.duration,
-    //         course: this.courseID,
-    //         sched: this.sched,
-    //         instance: this.instance,
-    //         room: this.roomID
-    //     });
+    isConflict(a: Activity){
+        if(a.id === this.id) return false;
 
-    //     clone.instructorID = this.instructorID
-    //     clone.sectionID = this.sectionID;
+        return (this.start_time < a.end && this.end > a.start_time) || 
+        (a.start_time < this.end && a.end > this.start_time) ||
+        (a.start_time === this.start_time) ||
+        (a.end === this.end);
+    }
 
-    //     return clone;
-    // }
+    clone() : Activity {
+        const clone = new Activity({
+            start: this.start_time,
+            duration: this.duration,
+            course: this.courseID,
+            sched: this.sched,
+            instance: this.instance,
+            room: this.roomID
+        });
+
+        clone.instructorID = this.instructorID
+        clone.sectionID = this.sectionID;
+        
+        clone.id = this.id;
+
+        return clone;
+    }
 }

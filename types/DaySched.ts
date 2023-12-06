@@ -37,6 +37,16 @@ export class DaySchedArray extends Array<DaySched>{
         const i = this.indexOf(sec);
         (i !== -1) && this.splice(i, 1);
     }
+
+    isAddable(a: Activity){
+        return (a.sched - 1 < this.length) && this[a.sched - 1].isAddable(a);
+    }
+
+    getConflicts() : Activity[][] {
+        const result : Activity[][] = [];
+        this.forEach(sc => result.push(...sc.getConflicts()));
+        return result;
+    }
 }
 
 export interface DaySchedParams{
@@ -152,6 +162,30 @@ export class DaySched{
                     r instanceof Section ? this.settings.max_student_minutes_per_day : -1;
 
         return this.total_occupied_minutes + duration <= max;
+    }
+
+    getConflicts() : Activity[][] {
+        const conflicts : Activity[][] = [];
+
+        this.activities.forEach(a => {
+            const conflict_group : Activity[] = [];
+
+            this.activities.forEach(b => {
+                if(a.id === b.id) return;
+
+                if(a.isConflict(b)) conflict_group.push(b);
+            })
+
+            if(conflict_group.length === 0) return; 
+            conflict_group.unshift(a);
+            conflicts.push(conflict_group);
+        })
+
+        return conflicts;
+    }
+
+    isAddable(a: Activity){
+        return this.activities.every(ac => !ac.isConflict(a));
     }
 
     equals(sched: DaySched) : boolean {

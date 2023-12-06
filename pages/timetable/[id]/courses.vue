@@ -185,9 +185,7 @@ onMounted(() => {
                 <div class="flex flex-grow gap-2 flex-wrap h-full">
 
                     <!-- On Create Params -->
-                    <UFormGroup class="w-1/2 flex flex-col gap-1 min-w-[400px]" :error="!chosen.classes_offered && chosen.classes_offered !== 0 ? 'Input the number of classes offered' :
-                        chosen.classes_offered < 1 ? 'Classes offered must be greater than 0' :
-                            !chosen.name ? 'Assign a course name' : undefined">
+                    <UFormGroup class="w-1/2 flex flex-col gap-1 min-w-[400px]" :error="!chosen.name ? 'Assign a course name' : undefined">
 
                         <div class="flex justify-between items-center">
                             <div class="flex gap-1 text-sm w-1/2">

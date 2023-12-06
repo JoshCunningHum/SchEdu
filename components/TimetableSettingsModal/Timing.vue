@@ -111,7 +111,7 @@ const removeExclusive = (og : number) => {
       <UToggle v-model="include_sat" />
     </UFormGroup>
 
-    <UFormGroup label="excluded Periods">
+    <UFormGroup label="Excluded Periods">
     </UFormGroup>
 
     <div class="flex-grow w-full flex gap-2 min-h-0">

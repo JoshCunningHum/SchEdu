@@ -154,6 +154,9 @@ const getPosition = (minutes: number, isStart: boolean = true) : number => {
                                 <span v-if="!(value instanceof Room)">
                                     {{ a.room(rooms)?.name || `[No Room]`}}
                                 </span>
+                                <!-- <span>
+                                    {{ a.id }}
+                                </span> -->
                                 <!-- {{ a.duration || 'No Name' }} -->
                             </div>
 

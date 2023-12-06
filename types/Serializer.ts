@@ -75,6 +75,7 @@ export class Serializer{
                     n.roomID = a.roomID;
                     n.instructorID = a.instructorID;
                     n.sectionID = a.sectionID;
+                    n.id = a.id;
 
                     activities.push(n);
                 });
@@ -115,6 +116,7 @@ export class Serializer{
                 n.roomID = a.roomID;
                 n.instructorID = a.instructorID;
                 n.sectionID = a.sectionID;
+                n.id = a.id;
 
                 activities.push(n);
             });
@@ -124,7 +126,6 @@ export class Serializer{
                 name: c.name, 
                 minutes: c.minutesPersession * c.weekly_meetings, 
                 meetings: c.weekly_meetings,
-                classes_offered: c.classes_offered, 
                 room_types: compatible_rooms});
 
             n.id = c.id;
@@ -194,6 +195,7 @@ export class Serializer{
                     n.roomID = a.roomID;
                     n.instructorID = a.instructorID;
                     n.sectionID = a.sectionID;
+                    n.id = a.id;
 
                     activities.push(n);
                 });
@@ -242,6 +244,7 @@ export class Serializer{
                     n.roomID = a.roomID;
                     n.instructorID = a.instructorID;
                     n.sectionID = a.sectionID;
+                    n.id = a.id;
 
                     activities.push(n);
                 });
