@@ -34,10 +34,6 @@ const columns = [{
 }, {
   key: 'compatible_rooms',
   label: 'Room Types',
-}, {
-  key: 'classes_offered',
-  label: 'Classes Offered',
-  sortable: true
 }];
 
 const selectedCourses = ref<Array<Course>>([...props.modelValue]);

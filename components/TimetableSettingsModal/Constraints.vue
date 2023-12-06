@@ -5,7 +5,7 @@ const settings = computed(() => timetableStore.selected?.data?.params.settings);
 
 const mim = computed({
   get: () => settings.value?.max_instructor_minutes_per_day || 0,
-  set: (v : number) => (settings.value === undefined) || (settings.value.max_room_minutes_per_day = v)
+  set: (v : number) => (settings.value === undefined) || (settings.value.max_instructor_minutes_per_day = v)
 })
 const msm = computed({
   get: () => settings.value?.max_student_minutes_per_day || 0,

@@ -67,7 +67,8 @@ export class Serializer{
                         start: a.start_time,
                         duration: a.duration,
                         sched: new DaySched({day: a.sched, settings: settings}),
-                        instance: a.instance
+                        instance: a.instance,
+                        course: a.courseID
                     });
 
                     // Assign other optional properties
@@ -108,7 +109,8 @@ export class Serializer{
                     start: a.start_time,
                     duration: a.duration,
                     sched: new DaySched({day: a.sched, settings: settings}),
-                    instance: a.instance
+                    instance: a.instance,
+                    course: a.courseID
                 });
 
                 // Assign other optional properties
@@ -170,7 +172,6 @@ export class Serializer{
             const n = new Instructor({
                 name: i.name,
                 compatible_courses,
-                max_minutes: i.max_minutes,
                 settings,
                 period_start: settings.start,
                 period_end: settings.end
@@ -187,7 +188,8 @@ export class Serializer{
                         start: a.start_time,
                         duration: a.duration,
                         sched: new DaySched({day: a.sched, settings: settings}),
-                        instance: a.instance
+                        instance: a.instance,
+                        course: a.courseID
                     });
 
                     // Assign other optional properties
@@ -236,7 +238,8 @@ export class Serializer{
                         start: a.start_time,
                         duration: a.duration,
                         sched: new DaySched({day: a.sched, settings: settings}),
-                        instance: a.instance
+                        instance: a.instance,
+                        course: a.courseID
                     });
 
                     // Assign other optional properties

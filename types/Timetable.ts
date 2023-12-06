@@ -187,10 +187,10 @@ export class Timetable {
     }
 
     putInstructorToRooms(t: Instructor) {
-        const { settings, rooms } = this, DEV_MODE = false;
+        const { settings, rooms } = this, DEV_MODE = true;
         const { once_prio: once, twice_prio: twice, thrice_prio: thrice, include_sat } = settings;
 
-        const GetAllInstance = (arr: Activity[], inst: number) : Activity[] => arr.filter(a => a.instance === inst);
+        const GetAllInstance = (arr: Activity[], inst: number, course: string) : Activity[] => arr.filter(a => a.instance === inst && a.courseID === course);
 
         // Can't write the orginal, too long, that's what she said
 
@@ -213,24 +213,23 @@ export class Timetable {
                 if(DEV_MODE) console.log(`Trying on this room: `, r);
                 
                 r.scheds.forEach(s => {
-
                     const pairs = prio.find(p => p.includes(s.day));
                     const room_scheds = r.scheds.filter(sc => pairs?.includes(sc.day));
                     const inst_scheds = t.scheds.filter(sc => pairs?.includes(sc.day));
 
-                    if(DEV_MODE) console.log(`On Day ${s.day} (${Day[s.day]}): `, pairs);
+                    if(DEV_MODE) console.log(`On Day ${s.day} (${Day[s.day]}): `, pairs, room_scheds.map(sc => sc.day), inst_scheds.map(inst => inst.day));
                     
                     s.activities.forEach(a => {
 
-                        const pair_acts = room_scheds.map(sc => GetAllInstance(sc.activities, a.instance)[0]);
+                        const pair_acts = room_scheds.map(sc => GetAllInstance(sc.activities, a.instance, a.courseID || '')[0]);
 
                         if(DEV_MODE) console.log(`Pair acts: `, JSON.parse(JSON.stringify(pair_acts)));
 
                         const acts_exists = pair_acts.every(p => !!p);
                         const acts_no_instructor = pair_acts.every(p => !p.instructorID);
                         const inst_vacant = inst_scheds.every((sc, sci) => sc.checkVacant(pair_acts[sci].start_time, pair_acts[sci].duration));
-                        const acts_equal_course = pair_acts.every(p => p.courseID === tcc.id);
-                        const inst_have_minutes = t.addMinutes(tcc.minutes);
+                        const acts_equal_course = pair_acts.every(p => p.courseID === a.courseID);
+                        const inst_have_minutes = t.checkMinutes(a.course(this.courses)?.minutes || tcc.minutes);
                         const follows_constraint = inst_scheds.every((sc, sci) => sc.checkViolation(t, pair_acts[sci].duration));
 
                         if(
@@ -245,6 +244,7 @@ export class Timetable {
                             // Set activity instructor and clone it
                             a.instructorID = t.id;
                             inst_scheds.forEach(sc => sc.addExistingActivity(a));
+                            t.addMinutes(tcc.minutes);
 
                             if(DEV_MODE) console.log(`%cSuccessfully Added Activity`, 'color:green;');
                         }else if(DEV_MODE){

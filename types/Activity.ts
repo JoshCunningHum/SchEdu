@@ -32,7 +32,7 @@ export interface ActivityParams{
     start: number;
     duration: number;
     sched: DaySched | number;
-    course?: Course | string;
+    course: Course | string;
     room?: Room | string;
     instance: number;
 }
@@ -44,7 +44,7 @@ export class Activity{
     duration: number;
     sched: number;
 
-    courseID?: string;
+    courseID: string;
     roomID?: string;
     instructorID?: string;
     sectionID?: string;

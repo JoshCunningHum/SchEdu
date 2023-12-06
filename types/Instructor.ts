@@ -18,28 +18,33 @@ export interface InstructorParams{
     period_start?: number;
     period_end?: number;
     settings: TimetableSettings;
-
-    // Optional parameters
-    max_minutes?: number;
 }
 
 export class Instructor extends ExtE<Instructor>{
     id: string;
     name: string;
-    max_minutes: number;
     compatible_courses: CourseArray;
     scheds: DaySchedArray;
     total_minutes: number = 0;
 
-    constructor({name, compatible_courses, max_minutes, settings, period_start, period_end } : InstructorParams){
+    settings : TimetableSettings;
+
+    constructor({name, compatible_courses, settings, period_start, period_end } : InstructorParams){
         super();
         this.id = useGenID(8);
         this.name = name;
         this.compatible_courses = compatible_courses;
-
-        this.max_minutes = max_minutes || settings.max_instructor_minutes_per_day|| Number.MAX_SAFE_INTEGER;
+        this.settings = settings;
 
         this.scheds = DaySched.create_week(settings, period_start, period_end);
+    }
+
+    get max_minutes(){
+        return this.settings.max_instructor_minutes_per_day;
+    }
+
+    checkMinutes(minutes: number) : boolean {
+        return this.total_minutes + minutes <= this.max_minutes;
     }
 
     addMinutes(minutes: number) : boolean {

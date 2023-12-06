@@ -106,10 +106,6 @@ const removeExclusive = (og : number) => {
       </UFormGroup>
 
     </div>
-    
-    <UFormGroup label="Include Saturday" class="select-none">
-      <UToggle v-model="include_sat" />
-    </UFormGroup>
 
     <UFormGroup label="Excluded Periods">
     </UFormGroup>

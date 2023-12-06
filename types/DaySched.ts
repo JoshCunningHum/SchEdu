@@ -61,7 +61,7 @@ export class DaySched{
     static create_week(settings: TimetableSettings, cstart?: number, cend?: number) : DaySchedArray {
         const { start, end, include_sat } = settings;
 
-        const last = include_sat ? Day.SAT : Day.FRI;
+        const last = Day.SAT;
         return new DaySchedArray(new Array(last).fill(0).map((v, day) => new DaySched({day: day + 1, start: cstart || start, end: cend || end, settings})));
     }
 
