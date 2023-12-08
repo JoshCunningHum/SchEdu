@@ -105,7 +105,9 @@ export class Serializer{
             // Replicate any Activities
             const activities = new ActivityArray();
             c.course_classes.forEach(a => {
-                const n = new Activity({
+                let n = f_rooms.flatMap(r => r.scheds.flatMap(sc => sc.activities.map(a => a))).find(ac => ac.id === a.id);
+                
+                n = !! n ? n : new Activity({
                     start: a.start_time,
                     duration: a.duration,
                     sched: new DaySched({day: a.sched, settings: settings}),
@@ -184,7 +186,9 @@ export class Serializer{
 
                 const activities = new ActivityArray();
                 r.activities.forEach(a => {
-                    const n = new Activity({
+                    let n = f_rooms.flatMap(r => r.scheds.flatMap(sc => sc.activities.map(a => a))).find(ac => ac.id === a.id);
+                    
+                    n = !! n ? n : new Activity({
                         start: a.start_time,
                         duration: a.duration,
                         sched: new DaySched({day: a.sched, settings: settings}),
@@ -234,7 +238,9 @@ export class Serializer{
 
                 const activities = new ActivityArray();
                 r.activities.forEach(a => {
-                    const n = new Activity({
+                    let n = f_rooms.flatMap(r => r.scheds.flatMap(sc => sc.activities.map(a => a))).find(ac => ac.id === a.id);
+                    
+                    n = !! n ? n : new Activity({
                         start: a.start_time,
                         duration: a.duration,
                         sched: new DaySched({day: a.sched, settings: settings}),

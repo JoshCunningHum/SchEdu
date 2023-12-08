@@ -179,6 +179,44 @@ const ondrop = (e: DragEvent) => {
   _act.value = undefined;
 }
 
+// Dragging on Activities
+const ondragoveract = (e: DragEvent, a: Activity) => {
+  if(!dragged.value || !(dragged.value instanceof Section)) return;
+  e.preventDefault();
+}
+
+const ondragleaveact = (e: DragEvent, a: Activity) => {
+  
+}
+
+const ondragenteract = (e: DragEvent, a: Activity) => {
+
+}
+
+const ondropact = (e: DragEvent, a: Activity) => {
+  if(!dragged.value || !(dragged.value instanceof Section)) return;
+  e.preventDefault();
+  const day = a.sched;
+
+  if(!!a.sectionID){
+    // Remove this activity to the section sched array
+    const prev_sec = a.section(sections.value);
+    if(!!prev_sec){
+      const i = prev_sec.scheds[day - 1].activities.findIndex(ac => ac.id === a.id);
+      if(i >= 0) prev_sec.scheds[day - 1].activities.splice(i, 1);
+    }
+  }
+
+  a.sectionID = dragged.value.id;
+  const curr_sec = a.section(sections.value);
+  if(!!curr_sec){
+    curr_sec.scheds[day - 1].activities.push(a);
+  }
+  
+}
+
+
+
 </script>
 
 <template>
@@ -265,7 +303,7 @@ const ondrop = (e: DragEvent) => {
           <template v-if="!!sched && sched.length > i - 1 && !!sched[i - 1]">
 
             <div v-for="a in sched[i - 1].activities" 
-              :class="`activity z-0 ${
+              :class="`activity ${
                 selected_act?.id === a.id ? 'selected' : ''
               } ${
                 hovered instanceof Course ? (hovered.id === a.courseID ? 'hovered' : '') : 
@@ -274,11 +312,14 @@ const ondrop = (e: DragEvent) => {
                 !!_act ? (_act.id === a.id ? '' : 'pointer-events-none') : ''
               } ${
                 mode.value === 1 && !a.sectionID ? 'lacking' : ''
+              } ${
+                dragged instanceof Section ? 'z-30' : 'z-0'
               }`"
               :style="`width: ${_actwidth}; top: ${getPosition(a.start_time) - 1}px; height: ${getPosition(a.duration, false) + 1}px;`"
               @click="select(a)"
               :draggable="true"
-              @dragstart="ondragstart($event, a)" @dragend="ondragend($event, a)">
+              @dragstart="ondragstart($event, a)" @dragend="ondragend($event, a)"
+              @dragover="ondragoveract($event, a)" @drop="ondropact($event, a)">
 
               <span class="text-center">
                 {{ a.course(courses)?.name }}

@@ -55,7 +55,7 @@ watch(categoryValues, v => {
 });
 
 // Zooming
-const zoomRaw = ref(50);
+const zoomRaw = ref(100);
 const zoomValue = computed(() => 101 - zoomRaw.value);
 
 const table = ref<InstanceType<typeof HTMLDivElement>>();
