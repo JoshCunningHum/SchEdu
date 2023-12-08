@@ -110,11 +110,11 @@ export class DaySched{
         return true;
     }
 
-    addActivity(course: Course, duration: number, instance: number, room: Room){
+    addActivity(course: Course, duration: number, instance: number, room: Room) : Activity | null {
         let { index_current_vacant: icv, settings: { interval } } = this;
 
         for(let i = 0; i < duration / interval; i++){
-            if(icv + i >= this.number_of_periods) return false;
+            if(icv + i >= this.number_of_periods) return null;
             if(!this.is_vacant[icv + i]){
                 this.current_vacant += interval;
                 icv++;
@@ -122,7 +122,7 @@ export class DaySched{
             }
         }
 
-        const act = this.activities.add({
+        const act = new Activity({
             start: this.current_vacant,
             duration: duration,
             course: course,
@@ -130,14 +130,15 @@ export class DaySched{
             instance: instance
         });
 
+        this.activities.push(act);
         act.roomID = room.id;
-        course.course_classes.add(act);
+        course.course_classes.push(act);
 
         icv = this.index_current_vacant; // getter
         this.total_occupied_minutes += duration;
         for(let i = 0; i < duration / interval; i++) this.is_vacant[icv + i] = false;
         this.current_vacant += duration;
-        return true;
+        return act;
     }
 
     addExistingActivity(act : Activity){
@@ -166,12 +167,14 @@ export class DaySched{
 
     getConflicts() : Activity[][] {
         const conflicts : Activity[][] = [];
+        const scanned : Activity[] = [];
 
         this.activities.forEach(a => {
             const conflict_group : Activity[] = [];
+            scanned.push(a);
 
             this.activities.forEach(b => {
-                if(a.id === b.id) return;
+                if(scanned.findIndex(sc => sc.id === b.id) !== -1) return;
 
                 if(a.isConflict(b)) conflict_group.push(b);
             })

@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { Value } from 'sass';
+import { ActivityArray } from '~/types/Activity';
 import { Course, CourseArray } from '~/types/Course';
 import { Instructor } from '~/types/Instructor';
 import { Room, RoomArray } from '~/types/Room';
 import { Section, SectionArray } from '~/types/Section';
+import { Day } from '~/types/DaySched';
 
 const props = defineProps({
   item: {
@@ -23,6 +24,7 @@ const sched = computed(() => timetableStore.selected?.data?.sched);
 const rooms = computed(() => sched.value?.rooms || new RoomArray());
 const sections = computed(() => sched.value?.sections || new SectionArray());
 const courses = computed(() => sched.value?.courses || new CourseArray());
+const activities = computed(() => sched.value?.activities || new ActivityArray());
 
 // Item Details
 
@@ -43,12 +45,13 @@ const course_offers = (c: Course): number => {
 const offers_left = (c: Course): number => {
   const offers = course_offers(c);
   // Loop through all room activities and count all activities with course id same as the parameter
-  const activities = rooms.value.map(r => r.scheds.map(sc => sc.activities.map(a => a)).flat()).flat().filter(a => a.courseID === c.id).length;
-  return offers - activities;
+  const count = activities.value.filter(a => a.courseID === c.id).length;
+  return offers - count;
 }
 
 const cov = computed(() => item.value instanceof Course ? course_offers(item.value) : 0);
 const olv = computed(() => item.value instanceof Course ? offers_left(item.value) : 0);
+
 const c_sections = computed(() => {
   if (!(item.value instanceof Course)) return [];
   return sections.value.filter(s => s.section_courses.some(c => c.id));
@@ -68,12 +71,11 @@ const section_classes = (s: Section) => {
 }
 
 const section_actual_classes = (s: Section) => {
-  const activities = rooms.value.map(r => r.scheds.map(sc => sc.activities.map(a => a)))
-  .flat().flat().filter(a => a.sectionID === s.id);
+  const section_activities = activities.value.filter(a => a.sectionID === s.id);
 
   const classes = section_classes(s);
   classes.forEach(stat => {
-    stat.count = activities.reduce((acc, a) => acc += (a.courseID === stat.id ? 1 : 0), 0);
+    stat.count = section_activities.reduce((acc, a) => acc += (a.courseID === stat.id ? 1 : 0), 0);
   })
 
   return classes;
@@ -84,7 +86,7 @@ const sac = computed(() => item.value instanceof Section ? section_actual_classe
 // Error and Warnings
 
 const schedConflicts = computed(() => {
-  if(!(item.value instanceof Section) && !(item.value instanceof Instructor)) return [];
+  if (!(item.value instanceof Section) && !(item.value instanceof Instructor)) return [];
 
   const conflicts = item.value.scheds.getConflicts().filter(g => Array.isArray(g));
 
@@ -95,7 +97,7 @@ const errors = computed(() => {
 
   if (item.value instanceof Course) {
     return olv.value < 0;
-  } else if (item.value instanceof Section){
+  } else if (item.value instanceof Section) {
     return !!sac.value && sac.value.some(stat => stat.count > stat.meetings) ||
       schedConflicts.value.length > 0;
   }
@@ -107,7 +109,7 @@ const warnings = computed(() => {
 
   if (item.value instanceof Course) {
     return olv.value > 0;
-  }else if (item.value instanceof Section){
+  } else if (item.value instanceof Section) {
     return !!sac.value && sac.value.some(stat => stat.count < stat.meetings);
   }
 
@@ -153,8 +155,8 @@ const onmouseleave = (e: MouseEvent) => {
   <div class="item" v-if="show" ref="el">
 
     <div class="flex justify-between items-center w-full px-2 py-1.5 "
-      :class="`${errors ? 'error' : warnings ? 'warning' : ''}`" :draggable="true" @dragstart="ondragstart" @dragend="ondragend"
-      @mouseover="onmouseover" @mouseleave="onmouseleave">
+      :class="`${errors ? 'error' : warnings ? 'warning' : ''}`" :draggable="true" @dragstart="ondragstart"
+      @dragend="ondragend" @mouseover="onmouseover" @mouseleave="onmouseleave">
 
       <!-- Section Special -->
       <template v-if="(item instanceof Section) && (!filter || item.id.includes(filter))">
@@ -166,10 +168,10 @@ const onmouseleave = (e: MouseEvent) => {
       </template>
 
 
-        <UPopover mode="hover" :popper="{ placement: 'right', offsetDistance: 25 }" :ui="{ }">
+      <UPopover mode="hover" :popper="{ placement: 'right', offsetDistance: 25 }" :ui="{}">
 
-          <div>
-            
+        <div>
+
           <span v-if="(item instanceof Course)">
             {{ olv || '' }}
           </span>
@@ -177,55 +179,54 @@ const onmouseleave = (e: MouseEvent) => {
             <UIcon name="i-mdi-alert" />
           </span>
 
-          </div>
+        </div>
 
 
-          <template #panel>
-            <div class="px-2 py-1 text-xs tracking-wider">
+        <template #panel>
+          <div class="px-2 py-1 text-xs tracking-wider">
 
-              <div class="warning">
-                <div v-if="olv > 0">
-                  <div>Lacking assignments: {{ cov - olv }} / {{ cov }}</div>
-                </div>
-                <div v-if="!!sac && sac.some(stat => stat.count < stat.meetings)">
-                  <div>Lacking course assignments</div>
-                  <div v-for="stat in sac">
-                    <div v-if="stat.count < stat.meetings">
-                      {{ stat.course }}: {{ stat.count }} / {{ stat.meetings }}
-                    </div>
+            <div class="warning">
+              <div v-if="olv > 0">
+                <div>Lacking assignments: {{ cov - olv }} / {{ cov }}</div>
+              </div>
+              <div v-if="!!sac && sac.some(stat => stat.count < stat.meetings)">
+                <div>Lacking course assignments</div>
+                <div v-for="stat in sac">
+                  <div v-if="stat.count < stat.meetings">
+                    - {{ stat.course }}: {{ stat.count }} / {{ stat.meetings }}
                   </div>
                 </div>
               </div>
-
-              <div class="error">
-                <div v-if="olv < 0">
-                  <div>Exceeding assignments: {{ cov - olv }} / {{ cov }}</div>
-                </div>
-                <div v-if="!!sac && sac.some(stat => stat.count > stat.meetings)">
-                  <div>Exceeded course assignments</div>
-                  <div v-for="stat in sac">
-                    <div v-if="stat.count > stat.meetings">
-                      {{ stat.course }}: {{ stat.count }} / {{ stat.meetings }}
-                    </div>
-                  </div>
-                </div>
-                
-                <div v-if="schedConflicts.length > 0">
-                    <div>Schedule Conflict</div>
-                    <div>{{ schedConflicts }}</div>
-                    <div v-for="(group, groupI) in schedConflicts" :key="groupI">
-                      <div>{{ groupI }}</div>
-                      <div v-for="act in group" :key="act.id">
-                        {{ act.course(courses)?.name }}
-                      </div>
-                    </div>
-                  </div>
-              </div>
-
             </div>
-          </template>
 
-        </UPopover>
+            <div class="error">
+              <div v-if="olv < 0">
+                <div>Exceeding assignments: {{ cov - olv }} / {{ cov }}</div>
+              </div>
+              <div v-if="!!sac && sac.some(stat => stat.count > stat.meetings)">
+                <div>Exceeded course assignments</div>
+                <div v-for="stat in sac">
+                  <div v-if="stat.count > stat.meetings">
+                    - {{ stat.course }}: {{ stat.count }} / {{ stat.meetings }}
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="schedConflicts.length > 0">
+                <div>Schedule Conflict</div>
+                <div v-for="(group, groupI) in schedConflicts" :key="groupI">
+                  - ({{ Day[group[0].sched] }})
+                  <span v-for="act in group" :key="act.id" class="dashify">
+                    {{ act.course(courses)?.name }} [{{ act.room(rooms)?.name }}]
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </template>
+
+      </UPopover>
 
     </div>
 
@@ -239,17 +240,22 @@ const onmouseleave = (e: MouseEvent) => {
   content: ', ';
 }
 
+.dashify+.dashify::before {
+  content: ' - ';
+}
+
 .success {
   @apply bg-accent;
 }
 
 .warning {
   @apply text-amber-500;
+  font-weight: 400;
 }
 
 .error {
-  @apply text-red-500;
-  font-weight: 300;
+  @apply text-rose-500;
+  font-weight: 400;
 }
 
 .item {

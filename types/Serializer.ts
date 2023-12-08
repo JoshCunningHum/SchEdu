@@ -10,13 +10,13 @@ import { Timetable, TimetableBuilder, type TimetableParams } from "./Timetable";
 export class Serializer{
 
     /**Fixes all references from a parsed TimeTableParams. Used for parsing the data from the databaase so that it will be reactive.*/
-    static fix(data: Timetable) : Timetable | null {
+    static fix(data: Timetable, paramsOnly = false) : Timetable | null {
 
         // We should expect that each instances of parameters that contains an instance of other parameters do not reference them, those that contains only has the exact copy but not the exact object in the memory
 
         // We should also expect that these object do not represent the actual objects types, they are not instances of each classes we made, because classes are outdated as fuck
 
-        let { rooms, courses, instructors, sections, settings } = data;
+        let { rooms, courses, instructors, sections, settings, activities } = data;
         
         const def_params = TimetableBuilder();
 
@@ -24,6 +24,7 @@ export class Serializer{
         if(!courses) courses = new CourseArray();
         if(!instructors) instructors = new InstructorArray();
         if(!sections) sections = new SectionArray();
+        if(!activities) activities = new ActivityArray();
 
         if(!settings) throw new Error("No settings in the parameters!");
 
@@ -44,6 +45,24 @@ export class Serializer{
         // Apply the RoomType to the settings
         settings.room_types = f_room_types;
 
+        const f_activities = new ActivityArray();
+        activities.forEach(a => {
+            const n = new Activity({
+                start: a.start_time,
+                duration: a.duration,
+                course: a.courseID,
+                sched: a.sched,
+                instance: a.instance
+            })
+
+            n.id = a.id;
+            n.roomID = a.roomID;
+            n.instructorID = a.instructorID;
+            n.sectionID = a.sectionID;
+
+            f_activities.push(n);
+        })
+
         // Rooms
         const f_rooms = new RoomArray();
         rooms.forEach(r => {
@@ -60,25 +79,12 @@ export class Serializer{
 
             // Replicate DayArray
             r.scheds.forEach((r, i) => {
-
+                if(paramsOnly) return;
                 const activities = new ActivityArray();
                 r.activities.forEach(a => {
-                    const n = new Activity({
-                        start: a.start_time,
-                        duration: a.duration,
-                        sched: new DaySched({day: a.sched, settings: settings}),
-                        instance: a.instance,
-                        course: a.courseID
-                    });
 
-                    // Assign other optional properties
-                    n.courseID = a.courseID;
-                    n.roomID = a.roomID;
-                    n.instructorID = a.instructorID;
-                    n.sectionID = a.sectionID;
-                    n.id = a.id;
-
-                    activities.push(n);
+                    const n = f_activities.get(a);
+                    if(!!n) activities.push(n);
                 });
 
                 n.scheds[i].activities = activities;
@@ -105,24 +111,9 @@ export class Serializer{
             // Replicate any Activities
             const activities = new ActivityArray();
             c.course_classes.forEach(a => {
-                let n = f_rooms.flatMap(r => r.scheds.flatMap(sc => sc.activities.map(a => a))).find(ac => ac.id === a.id);
-                
-                n = !! n ? n : new Activity({
-                    start: a.start_time,
-                    duration: a.duration,
-                    sched: new DaySched({day: a.sched, settings: settings}),
-                    instance: a.instance,
-                    course: a.courseID
-                });
-
-                // Assign other optional properties
-                n.courseID = a.courseID;
-                n.roomID = a.roomID;
-                n.instructorID = a.instructorID;
-                n.sectionID = a.sectionID;
-                n.id = a.id;
-
-                activities.push(n);
+                if(paramsOnly) return;
+                const n = f_activities.get(a);
+                if(!!n) activities.push(n);
             });
 
             // Do not forget to copy the id
@@ -186,24 +177,9 @@ export class Serializer{
 
                 const activities = new ActivityArray();
                 r.activities.forEach(a => {
-                    let n = f_rooms.flatMap(r => r.scheds.flatMap(sc => sc.activities.map(a => a))).find(ac => ac.id === a.id);
-                    
-                    n = !! n ? n : new Activity({
-                        start: a.start_time,
-                        duration: a.duration,
-                        sched: new DaySched({day: a.sched, settings: settings}),
-                        instance: a.instance,
-                        course: a.courseID
-                    });
-
-                    // Assign other optional properties
-                    n.courseID = a.courseID;
-                    n.roomID = a.roomID;
-                    n.instructorID = a.instructorID;
-                    n.sectionID = a.sectionID;
-                    n.id = a.id;
-
-                    activities.push(n);
+                    if(paramsOnly) return;
+                    const n = f_activities.get(a);
+                    if(!!n) activities.push(n);
                 });
 
                 n.scheds[i].activities = activities;
@@ -238,24 +214,9 @@ export class Serializer{
 
                 const activities = new ActivityArray();
                 r.activities.forEach(a => {
-                    let n = f_rooms.flatMap(r => r.scheds.flatMap(sc => sc.activities.map(a => a))).find(ac => ac.id === a.id);
-                    
-                    n = !! n ? n : new Activity({
-                        start: a.start_time,
-                        duration: a.duration,
-                        sched: new DaySched({day: a.sched, settings: settings}),
-                        instance: a.instance,
-                        course: a.courseID
-                    });
-
-                    // Assign other optional properties
-                    n.courseID = a.courseID;
-                    n.roomID = a.roomID;
-                    n.instructorID = a.instructorID;
-                    n.sectionID = a.sectionID;
-                    n.id = a.id;
-
-                    activities.push(n);
+                    if(paramsOnly) return;
+                    const n = f_activities.get(a);
+                    if(!!n) activities.push(n);
                 });
 
                 n.scheds[i].activities = activities;
@@ -271,6 +232,7 @@ export class Serializer{
         n.courses = f_courses;
         n.instructors = f_instructors;
         n.sections = f_sections;
+        n.activities = f_activities;
 
         return n;
     }
@@ -278,7 +240,7 @@ export class Serializer{
     /**Extracts the parameters from vue's reactivity. Used for generating the timetable */
     static extract(data: TimetableParams) : TimetableParams | null {
         const freed = JSON.parse(JSON.stringify(data)) as Timetable;
-        const fixed = this.fix(freed);
+        const fixed = this.fix(freed, true);
 
         if(!fixed) return null;
 

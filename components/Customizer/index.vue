@@ -3,6 +3,7 @@ import { Course, CourseArray } from '~/types/Course';
 import { Instructor, InstructorArray } from '~/types/Instructor';
 import { Room, RoomArray } from '~/types/Room';
 import { Section, SectionArray } from '~/types/Section';
+import { getCurrentInstance } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -18,6 +19,22 @@ const isOpen = computed({
   get: () => props.modelValue,
   set: v => emit('update:modelValue', v)
 });
+
+
+defineShortcuts({
+  '1': {
+    whenever: [isOpen],
+    handler: () => mode.value = modes[0]
+  },
+  '2': {
+    whenever: [isOpen],
+    handler: () => mode.value = modes[1]
+  },
+  '3': {
+    whenever: [isOpen],
+    handler: () => mode.value = modes[2]
+  },
+})
 
 // Stores
 const customizerStore = useCustomizerStore();
@@ -40,6 +57,13 @@ const modes = ['Move classes in rooms', 'Assign sections to classes', 'Assign in
 const mode = ref(modes[0]);
 const modeSearch = ref('');
 const current = ref<Room | undefined>(rooms.value[0]);
+
+
+whenever(isOpen, () => {
+  current.value = undefined;
+  customizerStore.selectedAct = undefined;
+})
+
 
 watch(mode, v => {
   current.value = rooms.value[0];
@@ -97,7 +121,7 @@ watchImmediate(current, v => (customizerStore.displayed = v));
       </template>
 
       <!-- Customizer Here -->
-      <div class="flex h-full">
+      <div class="flex h-full" v-if="!!isOpen">
 
         <div class="min-w-[150px] max-w-52 border-r border-secondary h-full min-h-0 flex flex-col">
           <div>
@@ -158,7 +182,7 @@ watchImmediate(current, v => (customizerStore.displayed = v));
         </template>
 
         <!-- Activity Viewer -->
-        <div class="min-w-[200px] max-w-[250px] border-l border-secondary h-full">
+        <div class="min-w-[250px] max-w-[300px] border-l border-secondary h-full">
           <CustomizerActivity />
         </div>
       </div>

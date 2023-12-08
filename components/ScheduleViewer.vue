@@ -4,7 +4,7 @@ import { Instructor, InstructorArray } from '~/types/Instructor';
 import { Room, RoomArray } from '~/types/Room';
 import { Section, SectionArray } from '~/types/Section';
 import { TimetableBuilder, TimetableSettings, type TimetableParams } from '~/types/Timetable';
-
+import { Day } from '~/types/DaySched';
 
 const timetableStore = useTimetableStore();
 
@@ -143,6 +143,9 @@ const getPosition = (minutes: number, isStart: boolean = true) : number => {
                                 class="absolute bg-accent top-0 flex items-center justify-center border text-xs jetbrainsmono text-center flex flex-col" 
                                 :style="`width: 96%; left: 2%; top: ${getPosition(a.start_time) - 1}px; height: ${getPosition(a.duration, false) + 1}px;`">
 
+                                <!-- <span>
+                                    {{ Day[a.sched] }}
+                                </span> -->
                                 <span>{{ a.course(courses)?.name }}
                                     <span v-if="!(value instanceof Section)">
                                         - {{ a.section(sections)?.id || '[No Section]'}}

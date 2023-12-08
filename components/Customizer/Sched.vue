@@ -2,7 +2,7 @@
 import { _width } from '#tailwind-config/theme';
 import { Activity } from '~/types/Activity';
 import { Course, CourseArray } from '~/types/Course';
-import { DaySched } from '~/types/DaySched';
+import { DaySched, DaySchedArray } from '~/types/DaySched';
 import { InstructorArray } from '~/types/Instructor';
 import { Room, RoomArray } from '~/types/Room';
 import { SectionArray, Section } from '~/types/Section';
@@ -27,8 +27,12 @@ const settings = computed(() => data.value?.settings);
 const _default = new TimetableSettings();
 
 // Shared Data
-const mode = computed(() => customizerStore.mode);
-const hovered = computed(() => customizerStore.hovered);
+const { 
+  mode, hovered,
+  primaryFilter, secondaryFilter,
+  previewAct: _act
+} = storeToRefs(customizerStore);
+
 
 // Parameters
 const rooms = computed(() => data.value?.rooms || new RoomArray());
@@ -71,17 +75,12 @@ const getPosition = (minutes: number, isStart: boolean = true): number => {
   return applied_offset + periodsCovered * heightPerPeriod.value;
 }
 
-// Selecting Activities
-const selected_act = computed(() => customizerStore.selectedAct);
-const select = (a: Activity) => {
-  customizerStore.selectedAct = a;
-}
 
 // Dropping
 const dragged = computed(() => customizerStore.dragged);
 const displayed = computed(() => customizerStore.displayed);
 const displayedSched = computed(() => displayed.value?.scheds);
-const _act = ref<Activity | undefined>();
+
 const allow_course_drop = computed(() => {
   if(!_act.value || !displayedSched.value) return;
 
@@ -90,13 +89,15 @@ const allow_course_drop = computed(() => {
 
   return sched.activities.every(a => !_act.value || a.id === _act.value.id || !a.isConflict(_act.value));
 })
-const allow_section_drop = computed(() => {
-  if(!displayedSched.value) return;
-})
+// const allow_section_drop = computed(() => {
+//   if(!displayedSched.value) return;
+// })
 
 watchImmediate(dragged, v => {
   if (!v){
     _act.value = undefined;
+    primaryFilter.value = undefined;
+    secondaryFilter.value = undefined;
   }else if (v instanceof Course) {
     // Create a new activity with that course ID and the current selected room
     _act.value = new Activity({
@@ -104,29 +105,15 @@ watchImmediate(dragged, v => {
       duration: v.minutesPersession,
       sched: 0,
       instance: 0,
-      course: v
+      course: v.id
     })
 
     if(displayed.value instanceof Room) _act.value.roomID = displayed.value.id;
+  }else if(v instanceof Section){
+    // Create primary filter
+    primaryFilter.value = v.scheds;
   }
 })
-
-let temp : Activity | undefined;
-
-const ondragstart = (e: DragEvent, a: Activity) => {
-  temp = a.clone();
-  // customizerStore.remove(a);
-  _act.value = temp;
-
-  // Disable Drag Image
-  const c = document.createElement('canvas');
-  c.width = c.height = 50;
-  e.dataTransfer?.setDragImage(c, 25, 25);
-} 
-
-const ondragend = (e: DragEvent, a:Activity) => {
-  _act.value = undefined;
-}
 
 const ondragover = (e: DragEvent) => {
   if (!_act.value) return;
@@ -140,6 +127,7 @@ const ondragover = (e: DragEvent) => {
   // Put identification for allowed and unallowed drops
   if (!!_act.value) {
     _act.value.start_time = start;
+    // TODO: Make sure to also track all the section/instructor/room daysched array (since we are changing the day)
     _act.value.sched = day;
   }
 
@@ -171,50 +159,16 @@ const ondrop = (e: DragEvent) => {
   if(!dragged.value){
     // Means that an activity is manually dragged
     customizerStore.remove(_act.value);
+    customizerStore.selectedAct = _act.value;
   }
 
   // Do Checking Here
-  props.sched[_act.value.sched - 1].activities.push(_act.value.clone());
+  customizerStore.add(_act.value);
 
   _act.value = undefined;
 }
 
 // Dragging on Activities
-const ondragoveract = (e: DragEvent, a: Activity) => {
-  if(!dragged.value || !(dragged.value instanceof Section)) return;
-  e.preventDefault();
-}
-
-const ondragleaveact = (e: DragEvent, a: Activity) => {
-  
-}
-
-const ondragenteract = (e: DragEvent, a: Activity) => {
-
-}
-
-const ondropact = (e: DragEvent, a: Activity) => {
-  if(!dragged.value || !(dragged.value instanceof Section)) return;
-  e.preventDefault();
-  const day = a.sched;
-
-  if(!!a.sectionID){
-    // Remove this activity to the section sched array
-    const prev_sec = a.section(sections.value);
-    if(!!prev_sec){
-      const i = prev_sec.scheds[day - 1].activities.findIndex(ac => ac.id === a.id);
-      if(i >= 0) prev_sec.scheds[day - 1].activities.splice(i, 1);
-    }
-  }
-
-  a.sectionID = dragged.value.id;
-  const curr_sec = a.section(sections.value);
-  if(!!curr_sec){
-    curr_sec.scheds[day - 1].activities.push(a);
-  }
-  
-}
-
 
 
 </script>
@@ -262,11 +216,18 @@ const ondropact = (e: DragEvent, a: Activity) => {
           </div>
 
           <!-- Primary Filter (Section) -->
-          <template v-if="!!dragged && (dragged instanceof Section)">
-            <div v-for="a in dragged.scheds[i - 1].activities"
+          <template v-if="!!primaryFilter">
+            <div v-for="a in primaryFilter[i - 1].activities"
             :style="`top: ${getPosition(a.start_time) - 1}px; height: ${getPosition(a.duration, false) + 1}px;`"
-            class="bg-opacity-50 bg-red-700 absolute pointer-events-none mx-auto left-0 right-0">
+            class="bg-opacity-50 bg-red-600 absolute pointer-events-none mx-auto left-0 right-0">
+            </div>
+          </template>
 
+          <!-- Secondary Filter (Instructor) -->
+          <template v-if="!!secondaryFilter">
+            <div v-for="a in secondaryFilter[i - 1].activities"
+            :style="`top: ${getPosition(a.start_time) - 1}px; height: ${getPosition(a.duration, false) + 1}px;`"
+            class="bg-opacity-20 bg-yellow-500 absolute pointer-events-none mx-auto left-0 right-0">
             </div>
           </template> 
 
@@ -302,40 +263,8 @@ const ondropact = (e: DragEvent, a: Activity) => {
           <!-- DaySched Data Here -->
           <template v-if="!!sched && sched.length > i - 1 && !!sched[i - 1]">
 
-            <div v-for="a in sched[i - 1].activities" 
-              :class="`activity ${
-                selected_act?.id === a.id ? 'selected' : ''
-              } ${
-                hovered instanceof Course ? (hovered.id === a.courseID ? 'hovered' : '') : 
-                hovered instanceof Section ? (hovered.id === a.sectionID ? 'hovered' : '' ) : ''
-              } ${
-                !!_act ? (_act.id === a.id ? '' : 'pointer-events-none') : ''
-              } ${
-                mode.value === 1 && !a.sectionID ? 'lacking' : ''
-              } ${
-                dragged instanceof Section ? 'z-30' : 'z-0'
-              }`"
-              :style="`width: ${_actwidth}; top: ${getPosition(a.start_time) - 1}px; height: ${getPosition(a.duration, false) + 1}px;`"
-              @click="select(a)"
-              :draggable="true"
-              @dragstart="ondragstart($event, a)" @dragend="ondragend($event, a)"
-              @dragover="ondragoveract($event, a)" @drop="ondropact($event, a)">
-
-              <span class="text-center">
-                {{ a.course(courses)?.name }}
-                -
-                <span class=" whitespace-nowrap">{{ a.section(sections)?.id || '[No Section]' }}</span>
-              </span>
-              <span>
-                {{ a.instructor(instructors)?.name || `[No Instructor]` }}
-              </span>
-              <span>
-                {{ a.room(rooms)?.name || `[No Room]` }}
-              </span>
-              <!-- <span>
-                {{ a.id }}
-              </span> -->
-            </div>
+            <CustomizerSession v-for="a in sched[i - 1].activities" :act="a" :key="a.id" 
+            :style="`width: ${_actwidth}; top: ${getPosition(a.start_time) - 1}px; height: ${getPosition(a.duration, false) + 1}px;`"/>
 
           </template>
 

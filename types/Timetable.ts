@@ -3,7 +3,7 @@ import { CourseArray, type Course } from "./Course";
 import { Instructor, InstructorArray } from "./Instructor";
 import { SectionArray, type Section } from "./Section";
 import { Day, DaySched } from "./DaySched";
-import type { Activity } from "./Activity";
+import { ActivityArray, type Activity } from "./Activity";
 
 export interface TimeTableOutput extends Timetable{}
 
@@ -68,6 +68,8 @@ export class Timetable {
     instructors: InstructorArray = new InstructorArray();
     sections: SectionArray = new SectionArray();
 
+    activities: ActivityArray = new ActivityArray();
+
     generate(params: TimetableParams) {
         // We clone the parameters because thats how it is
         const { rooms, courses, instructors, sections, settings } = params;
@@ -78,6 +80,7 @@ export class Timetable {
         this.instructors = instructors;
         this.sections = sections;
         this.settings = settings || new TimetableSettings();
+        this.activities = new ActivityArray(); // Delete all activities
 
         console.log("Inputs: ", rooms, courses, instructors, sections, this.settings);
 
@@ -169,10 +172,16 @@ export class Timetable {
                     while (classes_offered !== 0) {
                         const success = (meetings === 1 || scheds.every(s => s.checkConflict(duration))) && scheds.every(s => s.checkViolation(r, duration));
                         if (success) {
-                            const status = scheds.every(s => s.addActivity(c, duration, instance, r));
+                            const added_activities = scheds.map(s => s.addActivity(c, duration, instance, r));
+
+                            const status = added_activities.every(act => !!act);
+
                             if(status){
                                 classes_offered--;
                                 instance++;
+                                // For some reason, typescript don't recognize the result of a filter
+                                // It is understandable that typescript won't recognize that when code enters this block, all items in added_activities is surely not null
+                                added_activities.forEach(a => !!a && this.activities.push(a));
                             }
                             else{
                                 if(DEV_MODE) console.log('Failed Tho');
@@ -187,7 +196,7 @@ export class Timetable {
     }
 
     putInstructorToRooms(t: Instructor) {
-        const { settings, rooms } = this, DEV_MODE = true;
+        const { settings, rooms } = this, DEV_MODE = false;
         const { once_prio: once, twice_prio: twice, thrice_prio: thrice, include_sat } = settings;
 
         const GetAllInstance = (arr: Activity[], inst: number, course: string) : Activity[] => arr.filter(a => a.instance === inst && a.courseID === course);
@@ -243,7 +252,7 @@ export class Timetable {
                             pair_acts.forEach(p => p.instructorID = t.id);
                             // Set activity instructor and clone it
                             a.instructorID = t.id;
-                            inst_scheds.forEach(sc => sc.addExistingActivity(a));
+                            inst_scheds.forEach((sc, i) => sc.addExistingActivity(pair_acts[i]));
                             t.addMinutes(tcc.minutes);
 
                             if(DEV_MODE) console.log(`%cSuccessfully Added Activity`, 'color:green;');
@@ -279,7 +288,7 @@ export class Timetable {
 
             c.course_classes.forEach(a => {
 
-                console.log(`Attempt to add activity:`, a);
+                if(DEV_MODE) console.log(`Attempt to add activity:`, a);
                 const sched = s.scheds[a.sched - 1];
                 if(!sched) return;
 

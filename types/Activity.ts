@@ -4,27 +4,12 @@ import { DaySched, DaySchedArray } from './DaySched';
 import { Instructor, InstructorArray } from './Instructor';
 import { Room, RoomArray } from './Room';
 import { Section, SectionArray } from './Section';
+import { ExtArray, ExtE } from './ExtendedArray';
 
-export class ActivityArray extends Array<Activity>{
+export class ActivityArray extends ExtArray<Activity, ActivityParams>{
     
     constructor(...activities : Array<Activity[] | Activity>){
-        super();
-        this.push(...activities.flat());
-    }
-
-    add(params: ActivityParams | Activity) : Activity {
-        const n = params instanceof Activity ? params : new Activity(params);
-        this.push(n);
-        return n;
-    }
-
-    indexOf(act: Activity){
-        return this.findIndex(a => a.equals(act));
-    }
-
-    remove(act: Activity){
-        const i = this.indexOf(act);
-        (i !== -1) && this.splice(i, 1);
+        super(...activities);
     }
 }
 
@@ -37,14 +22,14 @@ export interface ActivityParams{
     instance: number;
 }
 
-export class Activity{
+export class Activity extends ExtE<Activity>{
     id: string;
 
     start_time: number;
     duration: number;
     sched: number;
-
     courseID: string;
+
     roomID?: string;
     instructorID?: string;
     sectionID?: string;
@@ -67,11 +52,19 @@ export class Activity{
         return arr.find(s => s.id === this.sectionID);
     }
 
+    change(v: Course | Room | Instructor | Section){
+        if(v instanceof Course) this.courseID = v.id;
+        else if(v instanceof Room) this.roomID = v.id;
+        else if(v instanceof Instructor) this.instructorID = v.id;
+        else if(v instanceof Section) this.sectionID = v.id;
+    }
+
     get end(){
         return this.start_time + this.duration;
     }
 
     constructor({start, duration, course, sched, instance, room} : ActivityParams ){
+        super();
         this.id = useGenID(8);
         this.start_time = start;
         this.duration = duration;
@@ -83,13 +76,14 @@ export class Activity{
     }
 
     equals(act: Activity){
-        return this.start_time === act.start_time && 
-        this.duration === act.duration && 
-        this.sched === act.sched && 
-        (!this.courseID || !act.courseID || this.courseID === act.courseID) &&
-        (!this.roomID || !act.roomID || this.roomID ===  act.courseID) &&
-        (!this.instructorID || !act.instructorID || this.instructorID === act.instructorID) &&
-        (!this.sectionID || !act.sectionID || this.sectionID === act.sectionID)
+        return this.id === act.id;
+    }
+
+    equalValue(act: Activity){
+        return this.courseID === act.courseID &&
+        this.roomID === act.roomID &&
+        this.instructorID === act.instructorID &&
+        this.sectionID === act.sectionID;
     }
 
     isConflict(a: Activity){
@@ -100,7 +94,7 @@ export class Activity{
         (a.start_time === this.start_time) ||
         (a.end === this.end);
     }
-
+    
     clone() : Activity {
         const clone = new Activity({
             start: this.start_time,
