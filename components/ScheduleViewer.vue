@@ -77,7 +77,7 @@ const getPosition = (minutes: number, isStart: boolean = true) : number => {
 <template>
     <div class="w-full flex-grow relative flex gap-1 min-h-0">
         <!-- Actual Content -->
-        <div class="flex-grow h-full flex flex-col">
+        <div class="flex-grow h-full flex flex-col px-3 pb-3">
 
             <div class="w-full" style="padding-right: 9px;">
                 

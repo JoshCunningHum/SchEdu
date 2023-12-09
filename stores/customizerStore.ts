@@ -1,3 +1,4 @@
+import { get } from '@vueuse/core';
 import { defineStore } from 'pinia'
 import { Activity, ActivityArray } from '~/types/Activity';
 import { CourseArray, Course } from '~/types/Course';
@@ -29,7 +30,7 @@ export const useCustomizerStore = defineStore('customizer', () => {
   });
 
   // Displayed Sched
-  const displayed = ref<Room | Section | undefined>();
+  const displayed = ref<Room | Course | undefined>();
   const primaryFilter = ref<DaySchedArray | undefined>();
   const secondaryFilter = ref<DaySchedArray | undefined>();
   const previewAct = ref<Activity | undefined>();
@@ -38,11 +39,18 @@ export const useCustomizerStore = defineStore('customizer', () => {
 
   const hovered = ref<Course | Section | undefined>();
   const draggedEl = ref<InstanceType<typeof HTMLDivElement>>();
-  const dragged = ref<Course| Section | undefined>();
+  const dragged = ref<Course| Section | Instructor | undefined>();
 
   // Activity Selection/Modification
 
   const selectedAct = ref<Activity>();
+  const selectedPairs = computed(() => get(activities).filter(a =>
+    !!selectedAct.value && 
+    a.id !== selectedAct.value.id &&
+    // Instance part is not needed, since we can freely create new instances of activity, and those times, instance is not properly set
+    // a.instance === selectedAct.value.instance &&
+    a.courseID === selectedAct.value.courseID &&
+    a.sectionID === selectedAct.value.sectionID));
 
   // Activity Operations
 
@@ -87,8 +95,6 @@ export const useCustomizerStore = defineStore('customizer', () => {
     const room = a.room(rooms.value);
     const section = a.section(sections.value);
 
-    console.log(`Trying to remove:`, a, instructor);
-
     if(!!instructor) {
       const sched = getSchedWithAct(a.id, instructor.scheds);
       console.log(sched);
@@ -109,6 +115,8 @@ export const useCustomizerStore = defineStore('customizer', () => {
 
     // Also remove in the activity array
     activities.value.remove(act => act.id === a.id);
+
+    if(selectedAct.value?.id === a.id) selectedAct.value = undefined;
   }
 
   const add = (a: Activity) => {
@@ -172,12 +180,14 @@ export const useCustomizerStore = defineStore('customizer', () => {
     instructors,
     sections,
     activities,
+    settings,
 
     remove,
     add,
     transfer,
 
     selectedAct,
+    selectedPairs,
     previewAct,
     displayed,
     primaryFilter,

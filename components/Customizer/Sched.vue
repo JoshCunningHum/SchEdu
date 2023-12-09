@@ -79,7 +79,7 @@ const getPosition = (minutes: number, isStart: boolean = true): number => {
 // Dropping
 const dragged = computed(() => customizerStore.dragged);
 const displayed = computed(() => customizerStore.displayed);
-const displayedSched = computed(() => displayed.value?.scheds);
+const displayedSched = computed(() => props.sched);
 
 const allow_course_drop = computed(() => {
   if(!_act.value || !displayedSched.value) return;

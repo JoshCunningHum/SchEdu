@@ -5,10 +5,11 @@ import { Instructor } from '~/types/Instructor';
 import { Room, RoomArray } from '~/types/Room';
 import { Section, SectionArray } from '~/types/Section';
 import { Day } from '~/types/DaySched';
+import { get } from '@vueuse/core';
 
 const props = defineProps({
   item: {
-    type: [Room, Section, Instructor, Course],
+    type: [Section, Instructor, Course],
     required: true
   },
   filter: {
@@ -21,14 +22,13 @@ const customizerStore = useCustomizerStore();
 const timetableStore = useTimetableStore();
 const sched = computed(() => timetableStore.selected?.data?.sched);
 
-const rooms = computed(() => sched.value?.rooms || new RoomArray());
-const sections = computed(() => sched.value?.sections || new SectionArray());
-const courses = computed(() => sched.value?.courses || new CourseArray());
-const activities = computed(() => sched.value?.activities || new ActivityArray());
+const { 
+  courses, rooms, instructors, sections, activities
+} = storeToRefs(customizerStore);
 
 // Item Details
 
-const item = computed<Room | Instructor | Section | Course>(() => props.item);
+const item = computed<Instructor | Section | Course>(() => props.item);
 const f = computed(() => props.filter?.toLowerCase() || '')
 const show = computed(() => !!item.value && (!props.filter ||
   (item.value instanceof Section ? item.value.id.toLowerCase().includes(f.value) : item.value.name.toLowerCase().includes(f.value))));
@@ -83,10 +83,16 @@ const section_actual_classes = (s: Section) => {
 
 const sac = computed(() => item.value instanceof Section ? section_actual_classes(item.value) : undefined);
 
+// Instructors
+
+const checkSched = customizerStore.checkSched;
+
+
 // Error and Warnings
 
 const schedConflicts = computed(() => {
-  if (!(item.value instanceof Section) && !(item.value instanceof Instructor)) return [];
+  if (!(item.value instanceof Section) && 
+    !(item.value instanceof Instructor)) return [];
 
   const conflicts = item.value.scheds.getConflicts().filter(g => Array.isArray(g));
 
@@ -100,6 +106,8 @@ const errors = computed(() => {
   } else if (item.value instanceof Section) {
     return !!sac.value && sac.value.some(stat => stat.count > stat.meetings) ||
       schedConflicts.value.length > 0;
+  } else if (item.value instanceof Instructor) {
+    return schedConflicts.value.length > 0;
   }
 
   return false;
@@ -124,7 +132,7 @@ const ondragstart = (event: DragEvent) => {
   if (!el.value) return;
   el.value.classList.add('dragging');
 
-  if (!(item.value instanceof Course) && !(item.value instanceof Section)) return;
+  if (!(item.value instanceof Course) && !(item.value instanceof Section) && !(item.value instanceof Instructor)) return;
   customizerStore.draggedEl = el.value;
   customizerStore.dragged = item.value;
 }
@@ -176,7 +184,10 @@ const onmouseleave = (e: MouseEvent) => {
             {{ olv || '' }}
           </span>
           <span v-else-if="(item instanceof Section) && (warnings || errors)">
-            <UIcon name="i-mdi-alert" />
+            <UIcon name="i-mdi-alert" class="pulsating" />
+          </span>
+          <span v-else-if="(item instanceof Instructor) && (warnings || errors)">
+            <UIcon name="i-mdi-alert" class="pulsating" />
           </span>
 
         </div>
@@ -242,6 +253,29 @@ const onmouseleave = (e: MouseEvent) => {
 
 .dashify+.dashify::before {
   content: ' - ';
+}
+.pulsating{
+	box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+	transform: scale(1);
+	animation: pulse 2s infinite;
+}
+
+
+@keyframes pulse {
+	0% {
+		transform: scale(0.95);
+		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+	}
+
+	70% {
+		transform: scale(1.1);
+		box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+	}
+
+	100% {
+		transform: scale(0.95);
+		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+	}
 }
 
 .success {

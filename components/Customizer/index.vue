@@ -3,7 +3,6 @@ import { Course, CourseArray } from '~/types/Course';
 import { Instructor, InstructorArray } from '~/types/Instructor';
 import { Room, RoomArray } from '~/types/Room';
 import { Section, SectionArray } from '~/types/Section';
-import { getCurrentInstance } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -20,21 +19,6 @@ const isOpen = computed({
   set: v => emit('update:modelValue', v)
 });
 
-
-defineShortcuts({
-  '1': {
-    whenever: [isOpen],
-    handler: () => mode.value = modes[0]
-  },
-  '2': {
-    whenever: [isOpen],
-    handler: () => mode.value = modes[1]
-  },
-  '3': {
-    whenever: [isOpen],
-    handler: () => mode.value = modes[2]
-  },
-})
 
 // Stores
 const customizerStore = useCustomizerStore();
@@ -56,7 +40,8 @@ const modes = ['Move classes in rooms', 'Assign sections to classes', 'Assign in
 
 const mode = ref(modes[0]);
 const modeSearch = ref('');
-const current = ref<Room | undefined>(rooms.value[0]);
+const current = ref<Room | Course | undefined>(rooms.value[0]);
+const selected = computed(() => customizerStore.selectedAct);
 
 
 whenever(isOpen, () => {
@@ -66,11 +51,55 @@ whenever(isOpen, () => {
 
 
 watch(mode, v => {
-  current.value = rooms.value[0];
+  
   if(!!v) customizerStore.mode = v;
+
+  if(v.value === 2) current.value = courses.value[0];
+  else current.value = current.value instanceof Room ? current.value : rooms.value[0];
+
 });
 watchImmediate(current, v => (customizerStore.displayed = v));
 
+const prev = () => {
+  const collection = mode.value.value === 2 ? courses.value : rooms.value;
+  const i = collection.findIndex(c => !!current.value && c.id === current.value.id);
+
+  if(i < 1) current.value = collection[0];
+  else current.value = collection[i - 1];
+}
+
+const next = () => {
+  const collection = mode.value.value === 2 ? courses.value : rooms.value;
+  const i = collection.findIndex(c => !!current.value && c.id === current.value.id);
+
+  if(i >= collection.length - 1) current.value = collection.at(-1);
+  else current.value = collection[i + 1];
+}
+
+defineShortcuts({
+  '1': {
+    whenever: [isOpen],
+    handler: () => mode.value = modes[0]
+  },
+  '2': {
+    whenever: [isOpen],
+    handler: () => mode.value = modes[1]
+  },
+  '3': {
+    whenever: [isOpen],
+    handler: () => mode.value = modes[2]
+  },
+  'delete': {
+    whenever: [(() => !!selected.value)],
+    handler: () => !!selected.value && customizerStore.remove(selected.value)
+  },
+  'arrowleft': {
+    handler: () => prev()
+  },
+  'arrowright': {
+    handler: () => next()
+  }
+})
 </script>
 
 <template>
@@ -126,7 +155,8 @@ watchImmediate(current, v => (customizerStore.displayed = v));
         <div class="min-w-[150px] max-w-52 border-r border-secondary h-full min-h-0 flex flex-col">
           <div>
             <!-- Room Selection -->
-            <USelectMenu v-model="current" variant="none" :options="rooms"
+            <USelectMenu v-model="current" variant="none" 
+              :options="mode.value === 2 ? courses : rooms"
               class="border-b border-secondary"
               :ui="{ rounded: 'rounded-none', input: 'border-transparent dark:border-transparent' }"
               :popper="{ placement: 'right-start' }">
@@ -174,8 +204,11 @@ watchImmediate(current, v => (customizerStore.displayed = v));
         </div>
 
         <!-- Main Section -->
-        <template v-if="!!current && !!current.scheds" >
+        <template v-if="(current instanceof Room)" >
           <CustomizerSched :sched="current.scheds" />
+        </template>
+        <template v-else-if="(current instanceof Course)">
+          <CustomizerActivityGrouper class="flex-grow " />
         </template>
         <template v-else>
           <div class="flex-grow"></div>

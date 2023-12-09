@@ -96,9 +96,9 @@ const compat_teacher = computed(() => !course.value || !instructor.value || inst
 const compat_section = computed(() => !course.value || !section.value || section.value.section_courses.has(course.value));
 const compat_room = computed(() => !course.value || !room.value || course.value.compatible_rooms.has(room.value.type));
 
-const conflict_room = computed(() => room.value?.scheds[day.value - 1].getConflicts() || []);
-const conflict_inst = computed(() => instructor.value?.scheds[day.value - 1].getConflicts() || []);
-const conflict_sect = computed(() => section.value?.scheds[day.value - 1].getConflicts() || []);
+const conflict_room = computed(() => room.value?.scheds[day.value - 1].getConflicts(act.value) || []);
+const conflict_inst = computed(() => instructor.value?.scheds[day.value - 1].getConflicts(act.value) || []);
+const conflict_sect = computed(() => section.value?.scheds[day.value - 1].getConflicts(act.value) || []);
 
 const course_class_req = computed(() => course.value?.weekly_meetings || 0);
 const course_class_count = computed(() => !!section.value ? customizerstore.checkClasses(act.value, section.value) : 0);
@@ -168,7 +168,7 @@ const errors = computed(() => {
       class="absolute right-1.5 top-1.5" v-if="!!course">
 
       <div>
-        <UIcon name="i-mdi-alert" class="text-lg" v-if="errors || warnings"/>
+        <UIcon name="i-mdi-alert" class="text-lg error pulsating" v-if="errors || warnings"/>
       </div>
 
       <template #panel>
@@ -267,6 +267,30 @@ const errors = computed(() => {
   &.over {
     // @apply border border-dashed;
   }
+}
+
+.pulsating{
+	box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+	transform: scale(1);
+	animation: pulse 2s infinite ease-in-out;
+}
+
+
+@keyframes pulse {
+	0% {
+		transform: scale(0.95);
+		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+	}
+
+	70% {
+		transform: scale(1.1);
+		box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+	}
+
+	100% {
+		transform: scale(0.95);
+		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+	}
 }
 
 .activity {

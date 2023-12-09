@@ -131,7 +131,7 @@ const remove = () => {
 
                     <span v-if="!compat_courses.find(t => !!course && t.id === course.id)"
                       class="warning flex items-center">
-                      <UIcon name="i-mdi-alert" />
+                      <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
 
                   </span>
@@ -145,7 +145,7 @@ const remove = () => {
 
                     <span v-if="checkClasses(course, section) <= (act.courseID === course.id ? -1 : 0)"
                       :class="`${checkClasses(course, section) < 0 ? 'error' : 'warning'} flex items-center`">
-                      <UIcon name="i-mdi-alert" />
+                      <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
 
                   </span>
@@ -161,7 +161,7 @@ const remove = () => {
 
                     <span v-if="course.compatible_rooms.every(rt => !!room && !rt.equals(room.type))"
                       class="warning flex items-center">
-                      <UIcon name="i-mdi-alert" />
+                      <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
 
                   </span>
@@ -185,7 +185,7 @@ const remove = () => {
                 <span class="w-3 h-full flex items-center">
 
                   <span v-if="!compat_courses.find(t => t.id === option.id)" class="warning flex items-center">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -200,7 +200,7 @@ const remove = () => {
 
                   <span v-if="checkClasses(option, section) <= (act.courseID === option.id ? -1 : 0)"
                     :class="`${checkClasses(option, section) < 0 ? 'error' : 'warning'} flex items-center`">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -216,7 +216,7 @@ const remove = () => {
 
                   <span v-if="option.compatible_rooms.every(rt => !!room && !rt.equals(room.type))"
                     class="warning flex items-center">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -248,7 +248,7 @@ const remove = () => {
                   <span class="w-3 h-full flex items-center">
 
                     <span v-if="checkSched(act, room)" class="error flex items-center">
-                      <UIcon name="i-mdi-alert" />
+                      <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
 
                   </span>
@@ -263,7 +263,7 @@ const remove = () => {
 
                     <span v-if="course.compatible_rooms.every(rt => !!room && !rt.equals(room.type))"
                       class="warning flex items-center">
-                      <UIcon name="i-mdi-alert" />
+                      <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
 
                   </span>
@@ -288,7 +288,7 @@ const remove = () => {
                 <span class="w-3 h-full flex items-center">
 
                   <span v-if="checkSched(act, option)" class="error flex items-center">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -303,7 +303,7 @@ const remove = () => {
 
                   <span v-if="course.compatible_rooms.every(rt => !rt.equals(option.type))"
                     class="warning flex items-center">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -333,7 +333,7 @@ const remove = () => {
                   <span class="w-3 h-full flex items-center">
 
                     <span v-if="checkSched(act, instructor)" class="error flex items-center">
-                      <UIcon name="i-mdi-alert" />
+                      <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
 
                   </span>
@@ -348,7 +348,7 @@ const remove = () => {
 
                     <span v-if="!compat_teachers.find(t => !!instructor && t.id === instructor.id)"
                       class="warning flex items-center">
-                      <UIcon name="i-mdi-alert" />
+                      <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
 
                   </span>
@@ -374,7 +374,7 @@ const remove = () => {
                 <span class="w-3 h-full flex items-center">
 
                   <span v-if="checkSched(act, option)" class="error flex items-center">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -388,7 +388,7 @@ const remove = () => {
                 <span class="w-3 h-full flex items-center">
 
                   <span v-if="!compat_teachers.find(t => t.id === option.id)" class="warning flex items-center">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -417,7 +417,7 @@ const remove = () => {
                   <span class="w-3 h-full flex items-center">
 
                     <span v-if="checkSched(act, section)" class="error flex items-center">
-                      <UIcon name="i-mdi-alert" />
+                      <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
 
                   </span>
@@ -432,7 +432,7 @@ const remove = () => {
 
                     <span v-if="checkClasses(act, section) <= (act.sectionID === section.id ? -1 : 0)"
                       :class="`${checkClasses(act, section) < 0 ? 'error' : 'warning'} flex items-center`">
-                      <UIcon name="i-mdi-alert" />
+                      <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
 
                   </span>
@@ -458,7 +458,7 @@ const remove = () => {
                 <span class="w-3 h-full flex items-center">
 
                   <span v-if="checkSched(act, option)" class="error flex items-center">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -473,7 +473,7 @@ const remove = () => {
 
                   <span v-if="checkClasses(act, option) <= (act.sectionID === option.id ? -1 : 0)"
                     :class="`${checkClasses(act, option) < 0 ? 'error' : 'warning'} flex items-center`">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -488,7 +488,7 @@ const remove = () => {
                 <span class="w-3 h-full flex items-center">
 
                   <span v-if="!option.section_courses.has(course)" class="warning flex items-center">
-                    <UIcon name="i-mdi-alert" />
+                    <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
 
                 </span>
@@ -527,6 +527,29 @@ const remove = () => {
 </template>
 
 <style lang="scss" scoped>
+.pulsating{
+	box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+	transform: scale(1);
+	animation: pulse 2s infinite ease-in-out;
+}
+
+
+@keyframes pulse {
+	0% {
+		transform: scale(0.95);
+		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+	}
+
+	70% {
+		transform: scale(1.1);
+		box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+	}
+
+	100% {
+		transform: scale(0.95);
+		box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+	}
+}
 .error {
   @apply text-red-500;
 }

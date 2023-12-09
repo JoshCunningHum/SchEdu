@@ -165,12 +165,14 @@ export class DaySched{
         return this.total_occupied_minutes + duration <= max;
     }
 
-    getConflicts() : Activity[][] {
+    getConflicts(exlusive?: Activity) : Activity[][] {
         const conflicts : Activity[][] = [];
         const scanned : Activity[] = [];
 
         this.activities.forEach(a => {
             const conflict_group : Activity[] = [];
+            if((!!exlusive && a.id !== exlusive.id)) return;
+
             scanned.push(a);
 
             this.activities.forEach(b => {
