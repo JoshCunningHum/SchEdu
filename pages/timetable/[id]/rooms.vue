@@ -128,7 +128,7 @@
                 <UFormGroup
                     :error="!roomTypes.has(chosen.type) ? 'Assigned to a non-existent room type' : undefined">
                     <div class="flex gap-1">
-                    <UInput class="w-[200px]" placeholder="Name Here" icon="i-mdi-edit" v-model="chosen.name" />
+                    <UInput class="w-[200px]" placeholder="Name Here" icon="i-mdi-edit" :model-value="chosen.name" @update:model-value="rename" />
                     <div class="w-[125px]">
                         
                         <USelectMenu 
@@ -186,7 +186,11 @@ const roomTypes = computed<RoomTypeArray>(() => settingsStore.roomTypes || new R
 
 // Modal
 const isCreating = ref(false);
-const name = ref('');
+const _name = ref('');
+const name = computed({
+    get: () => _name.value,
+    set: (s: string) => _name.value = s.trim()
+});
 const roomType = ref<RoomType | undefined>(roomTypes.value && roomTypes.value.length > 0 ? roomTypes.value[0] : undefined);
 
 const isExisting = (name: string) => rooms.value?.has((r => r?.name === name));
@@ -226,6 +230,10 @@ const select = (i: number) => {
     chosenIndex.value = i;
     if(chosen.value) chosenType.value = chosen.value.type;
 }
+const rename = (s: string) => {
+    if(!!chosen.value) chosen.value.name = s.trim();
+}
+
 
 const removeRoom = () => {
     if(!rooms.value || !chosen.value) return;

@@ -86,6 +86,12 @@ export class Activity extends ExtE<Activity>{
         this.sectionID === act.sectionID;
     }
 
+    gen_isAPair(act: Activity){
+        return this.instance === act.instance &&
+            this.courseID === act.courseID &&
+            this.roomID === act.roomID;
+    }
+
     isConflict(a: Activity){
         if(a.id === this.id) return false;
 

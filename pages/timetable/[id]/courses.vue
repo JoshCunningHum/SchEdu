@@ -16,7 +16,11 @@ const include_sat = computed(() => settingsStore.settings?.include_sat);
 // Modal
 
 const isCreating = ref(false);
-const name = ref('');
+const _name = ref('');
+const name = computed({
+    get: () => _name.value.trim(),
+    set: (s: string) => _name.value = s.trim()
+});
 const meetings = ref(2);
 const minutes = ref(interval.value * 4 || 60);
 
@@ -54,6 +58,10 @@ const chosenRoomTypes = computed({
         chosen.value.compatible_rooms.push(...v);
     }
 });
+
+const rename = (s: string) => {
+    if(!!chosen.value) chosen.value.name = s.trim();
+}
 
 const select = (i: number) => {
     chosenIndex.value = i;
@@ -175,7 +183,7 @@ onMounted(() => {
 
                 <div class="flex gap-1">
                     <div class="w-[350px]">
-                        <UInput icon="i-mdi-edit" v-model="chosen.name" />
+                        <UInput icon="i-mdi-edit" :model-value="chosen.name" @update:model-value="rename" />
                     </div>
                     <div>
                         <UButton label="Delete" color="red" @click="removeCourse()" />

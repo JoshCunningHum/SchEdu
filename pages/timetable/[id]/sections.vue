@@ -8,7 +8,11 @@ const courses = computed(() => courseStore.courses);
 
 // Modal
 const isCreating = ref(false);
-const name = ref('');
+const _name = ref('');
+const name = computed({
+    get: () => _name.value,
+    set: (s: string) => _name.value = s.trim()
+});
 const isExisting = (id: string) => !!sections.value && sections.value.findIndex(s => s.id === id) !== -1;
 
 const addSection = () => {
@@ -38,6 +42,9 @@ const sectionCourses = computed(() => sections.value.filter(t => !chosen.value |
         courses: s.section_courses
     }
 }));
+const rename = (s: string) => {
+    if(!!chosen.value) chosen.value.id = s.trim();
+}
 
 const select = (i: number) => {
     chosenIndex.value = i;
@@ -160,7 +167,7 @@ onMounted(() => {
                     <div class="flex gap-1 flex-grow justify-between">
                         <div class="flex flex-grow gap-1">
                             
-                            <UInput class="w-[200px]" placeholder="Name Here" icon="i-mdi-edit" v-model="chosen.id" />
+                            <UInput class="w-[200px]" placeholder="Name Here" icon="i-mdi-edit" :model-value="chosen.id" @update:model-value="rename" />
                             <UButton label="Delete" @click="removeSection" color="red" />
 
                         </div>

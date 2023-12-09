@@ -132,7 +132,7 @@ export class Timetable {
 
     putCourseToRooms(c: Course) {
         const { settings } = this, DEV_MODE = false;
-        const { once_prio: once, twice_prio: twice, thrice_prio: thrice, include_sat } = settings;
+        const { once_prio: once, twice_prio: twice, thrice_prio: thrice } = settings;
 
         let { weekly_meetings: meetings } = c, instance = 1, duration = c.minutes / c.weekly_meetings;
         
@@ -145,7 +145,7 @@ export class Timetable {
         const quantrice = [[1, 2, 3, 4, 5]];
         const hexrice = [[1, 2, 3, 4, 5, 6]];
 
-        if(DEV_MODE) console.log(`Putting rooms to Course: `, c);
+        if(DEV_MODE) console.log(`Putting rooms to Course: `, c, classes_offered);
 
         // Loop through the compatible room types of the course as Course Compatible Roomtype (CCR)
         c.compatible_rooms.forEach(ccr => {
@@ -162,7 +162,6 @@ export class Timetable {
 
                 prio.forEach(p => {
                     if (classes_offered === 0) return; // Guard clause, not needed daw
-                    if (!include_sat && p.includes(Day.SAT)) return;
 
                     // i + 1, since prio days starts with 1, while room scheds starts at 0, I think
                     const scheds: DaySched[] = r.scheds.filter(s => p.includes(s.day));
@@ -182,6 +181,7 @@ export class Timetable {
                                 // For some reason, typescript don't recognize the result of a filter
                                 // It is understandable that typescript won't recognize that when code enters this block, all items in added_activities is surely not null
                                 added_activities.forEach(a => !!a && this.activities.push(a));
+                                if(DEV_MODE) console.log(`%cSuccessfully Added Course`, 'color:green;');
                             }
                             else{
                                 if(DEV_MODE) console.log('Failed Tho');
@@ -197,7 +197,7 @@ export class Timetable {
 
     putInstructorToRooms(t: Instructor) {
         const { settings, rooms } = this, DEV_MODE = false;
-        const { once_prio: once, twice_prio: twice, thrice_prio: thrice, include_sat } = settings;
+        const { once_prio: once, twice_prio: twice, thrice_prio: thrice } = settings;
 
         const GetAllInstance = (arr: Activity[], inst: number, course: string) : Activity[] => arr.filter(a => a.instance === inst && a.courseID === course);
 
@@ -223,21 +223,25 @@ export class Timetable {
                 
                 r.scheds.forEach(s => {
                     const pairs = prio.find(p => p.includes(s.day));
-                    const room_scheds = r.scheds.filter(sc => pairs?.includes(sc.day));
-                    const inst_scheds = t.scheds.filter(sc => pairs?.includes(sc.day));
+                    if(!pairs) return;
+                    const room_scheds = r.scheds.filter(sc => pairs.includes(sc.day));
+                    const inst_scheds = t.scheds.filter(sc => pairs.includes(sc.day));
 
                     if(DEV_MODE) console.log(`On Day ${s.day} (${Day[s.day]}): `, pairs, room_scheds.map(sc => sc.day), inst_scheds.map(inst => inst.day));
                     
                     s.activities.forEach(a => {
 
-                        const pair_acts = room_scheds.map(sc => GetAllInstance(sc.activities, a.instance, a.courseID || '')[0]);
+                        const pair_acts = this.activities.filter(act => act.gen_isAPair(a));
 
                         if(DEV_MODE) console.log(`Pair acts: `, JSON.parse(JSON.stringify(pair_acts)));
 
                         const acts_exists = pair_acts.every(p => !!p);
                         const acts_no_instructor = pair_acts.every(p => !p.instructorID);
+
+                        if(pair_acts.length !== pairs.length) return;
+
                         const inst_vacant = inst_scheds.every((sc, sci) => sc.checkVacant(pair_acts[sci].start_time, pair_acts[sci].duration));
-                        const acts_equal_course = pair_acts.every(p => p.courseID === a.courseID);
+                        const acts_equal_course = pair_acts.every(p => p.courseID === tcc.id);
                         const inst_have_minutes = t.checkMinutes(a.course(this.courses)?.minutes || tcc.minutes);
                         const follows_constraint = inst_scheds.every((sc, sci) => sc.checkViolation(t, pair_acts[sci].duration));
 

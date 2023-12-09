@@ -156,10 +156,10 @@ const errors = computed(() => {
       -
       <span class=" whitespace-nowrap">{{ section?.id || '[No Section]' }}</span>
     </span>
-    <span>
+    <span class="text-center">
       {{ instructor?.name || `[No Instructor]` }}
     </span>
-    <span>
+    <span class="text-center">
       {{ room?.name || `[No Room]` }}
     </span>
 

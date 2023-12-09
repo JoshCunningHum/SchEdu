@@ -215,7 +215,7 @@ defineShortcuts({
         </template>
 
         <!-- Activity Viewer -->
-        <div class="min-w-[250px] max-w-[300px] border-l border-secondary h-full">
+        <div class="min-w-[250px] max-w-[250px] border-l border-secondary h-full">
           <CustomizerActivity />
         </div>
       </div>

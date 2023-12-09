@@ -36,7 +36,7 @@ watch(to, v => {
 
 <template>
   <div class="flex items-center gap-2 flex-wrap">
-    <div>
+    <div class="border-r pr-2">
       
       <USelectMenu :options="scheds" v-model="chosenDay">
         <template #label>

@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex gap-2 items-start">
                         <UFormGroup :error="teacherLastIndex(selected.name) !== selectedIndex && 'Teacher name already in the list'">
-                            <UInput icon="i-mdi-edit" placeholder="Name" v-model="selected.name"/>
+                            <UInput icon="i-mdi-edit" placeholder="Name" :model-value="selected.name" @update:model-value="rename"/>
                         </UFormGroup>
                         <UButton label="Delete" color="red" @click="deleteTeacher"/>
                     </div>
@@ -115,7 +115,11 @@ const teacherCourses = computed(() => teachers.value.filter(t => !t.equals(selec
 
 // Create a teacher
 const isCreating = ref(false);
-const name = ref('');
+const _name = ref('');
+const name = computed({
+    get: () => _name.value,
+    set: s => _name.value = s.trim()
+});
 const teacherLastIndex = name => teachers.value.findLastIndex(t => t.name == name);
 const isExisting = name => teachers.value.findIndex(t => t.name === name) !== -1;
 defineShortcuts({
@@ -127,6 +131,9 @@ defineShortcuts({
         handler: () => isCreating.value = true
     }
 })
+const rename = (s) => {
+    if(!!selected.value) selected.value.name = s.trim();
+}
 const addTeacher = () => {
     if(name.value === '') return;
     teacherStore.addTeacher(name.value);

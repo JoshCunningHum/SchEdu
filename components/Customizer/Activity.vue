@@ -123,7 +123,7 @@ const remove = () => {
           <!-- Label -->
           <template #label>
             <div class="flex justify-between items-center w-full gap-2" v-if="!!course">
-              <span>{{ course.name }}</span>
+              <span class="truncate">{{ course.name }}</span>  
               <div class="flex gap-2">
 
                 <UPopover mode="hover" v-if="!!instructor">
@@ -240,7 +240,7 @@ const remove = () => {
           <template #label>
             <div class="flex justify-between items-center w-full gap-2" v-if="!!room">
 
-              <span>{{ room.name }}</span>
+              <span class="truncate">{{ room.name }}</span>
 
               <div class="flex gap-2">
 
@@ -326,7 +326,7 @@ const remove = () => {
           <template #label>
             <div class="flex justify-between items-center w-full gap-2" v-if="instructor">
 
-              <span>{{ instructor.name }}</span>
+              <span class="truncate">{{ instructor.name }}</span>
 
               <div class="flex gap-2">
                 <UPopover mode="hover">
@@ -410,7 +410,7 @@ const remove = () => {
           <template #label>
             <div class="flex justify-between items-center w-full gap-2" v-if="!!section">
 
-              <span>{{ section.id }}</span>
+              <span class="truncate">{{ section.id }}</span>
 
               <div class="flex gap-2">
                 <UPopover mode="hover">
