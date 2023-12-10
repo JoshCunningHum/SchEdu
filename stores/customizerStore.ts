@@ -30,7 +30,7 @@ export const useCustomizerStore = defineStore('customizer', () => {
   });
 
   // Displayed Sched
-  const displayed = ref<Room | Course | undefined>();
+  const displayed = ref<Room | Course | Section | undefined>();
   const primaryFilter = ref<DaySchedArray | undefined>();
   const secondaryFilter = ref<DaySchedArray | undefined>();
   const previewAct = ref<Activity | undefined>();
@@ -166,6 +166,12 @@ export const useCustomizerStore = defineStore('customizer', () => {
     sched.activities.push(a);
   }
 
+  const setToOnline = (a: Activity) => {
+    const room = a.room(rooms.value);
+    if(!!room) getSchedWithAct(a.id, room.scheds)?.activities.remove(a);
+    a.roomID = undefined;
+  }
+
   // Force Update of things
   const forceUpdateActivityView = ref(false);
 
@@ -185,6 +191,7 @@ export const useCustomizerStore = defineStore('customizer', () => {
     remove,
     add,
     transfer,
+    setToOnline,
 
     selectedAct,
     selectedPairs,

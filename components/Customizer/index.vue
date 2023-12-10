@@ -31,7 +31,7 @@ const sections = computed<Section[]>(() => data.value?.sections || new SectionAr
 const courses = computed<Course[]>(() => data.value?.courses || new CourseArray());
 
 // Mode
-const modes = ['Move classes in rooms', 'Assign sections to classes', 'Assign instructors to classes'].map((v, i) => {
+const modes = ['Move classes in rooms', 'Assign sections to classes', 'Assign instructors to classes', 'Set online classes'].map((v, i) => {
   return {
     value: i,
     label: v
@@ -40,7 +40,7 @@ const modes = ['Move classes in rooms', 'Assign sections to classes', 'Assign in
 
 const mode = ref(modes[0]);
 const modeSearch = ref('');
-const current = ref<Room | Course | undefined>(rooms.value[0]);
+const current = ref<Room | Course | Section | undefined>();
 const selected = computed(() => customizerStore.selectedAct);
 
 
@@ -55,13 +55,15 @@ watch(mode, v => {
   if(!!v) customizerStore.mode = v;
 
   if(v.value === 2) current.value = courses.value[0];
+  else if(v.value === 3) current.value = sections.value[0];
   else current.value = current.value instanceof Room ? current.value : rooms.value[0];
 
 });
 watchImmediate(current, v => (customizerStore.displayed = v));
 
 const prev = () => {
-  const collection = mode.value.value === 2 ? courses.value : rooms.value;
+  const collection = mode.value.value === 2 ? courses.value :
+                     mode.value.value === 3 ? sections.value : rooms.value;
   const i = collection.findIndex(c => !!current.value && c.id === current.value.id);
 
   if(i < 1) current.value = collection[0];
@@ -69,7 +71,8 @@ const prev = () => {
 }
 
 const next = () => {
-  const collection = mode.value.value === 2 ? courses.value : rooms.value;
+  const collection = mode.value.value === 2 ? courses.value :
+                     mode.value.value === 3 ? sections.value : rooms.value;
   const i = collection.findIndex(c => !!current.value && c.id === current.value.id);
 
   if(i >= collection.length - 1) current.value = collection.at(-1);
@@ -88,6 +91,10 @@ defineShortcuts({
   '3': {
     whenever: [isOpen],
     handler: () => mode.value = modes[2]
+  },
+  '4': {
+    whenever: [isOpen],
+    handler: () => mode.value = modes[3]
   },
   'delete': {
     whenever: [(() => !!selected.value)],
@@ -132,15 +139,15 @@ defineShortcuts({
               </template>
 
               <template #default="{ link, index }">
-                <div :class="`${mode.value === index ? 'text-accent' : 'text-secondary-em'} cursor-pointer`"
+                <div :class="`${mode.value === index ? 'text-accent' : 'text-secondary-em'} cursor-pointer text-sm`"
                   @click="mode = modes[index]">
-                  {{ link.label }}
+                  {{ link.label }} <span class="text-xs text-amber-500" v-if="index === 3">(Optional)</span>
                 </div>
 
               </template>
 
               <template #divider>
-                <span class="w-8 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+                <span class="w-4 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
               </template>
 
             </UBreadcrumb>
@@ -156,21 +163,23 @@ defineShortcuts({
           <div>
             <!-- Room Selection -->
             <USelectMenu v-model="current" variant="none" 
-              :options="mode.value === 2 ? courses : rooms"
+              :options="mode.value === 2 ? courses : mode.value === 3 ? sections : rooms"
               class="border-b border-secondary"
               :ui="{ rounded: 'rounded-none', input: 'border-transparent dark:border-transparent' }"
               :popper="{ placement: 'right-start' }">
 
-              <template #option="{ option: room }: { option: Room }">
-                <span class="poppins">{{ room.name }}</span>
+              <template #option="{ option }: { option: Room | Section | Course }">
+                <span class="poppins" v-if="(option instanceof Section)">{{ option.id }}</span>
+                <span class="poppins" v-else-if="!(option instanceof Section)">{{ option.name }}</span>
               </template>
 
               <template #label>
                 <span v-if="!current" class="flex items-center content-center gap-2">
                   <UIcon name="i-mdi-alert" class="text-red-500" />
-                  Select Room
+                  {{ mode.value === 3 ? 'Select Section' : 'Select Room' }}
                 </span>
-                <span v-else class="poppins">{{ current.name }}</span>
+                <span v-else-if="(current instanceof Section)" class="poppins">{{ current.id }}</span>
+                <span v-else-if="!(current instanceof Section)" class="poppins">{{ current.name }}</span>
               </template>
 
             </USelectMenu>
@@ -179,7 +188,8 @@ defineShortcuts({
               }" 
             variant="none"
             icon="i-mdi-search" placeholder="Search..." v-model="modeSearch" 
-              class="border-b border-secondary"/>
+            class="border-b border-secondary"
+            v-if="mode.value !== 3" />
           </div>
 
           <!-- Draggable List Here -->
@@ -195,7 +205,7 @@ defineShortcuts({
                 <CustomizerItem :filter="modeSearch" :item="item" />
               </template>
             </template>
-            <template v-else>
+            <template v-else-if="mode.value === 2">
               <template v-for="item in instructors" class="item">
                 <CustomizerItem :filter="modeSearch" :item="item" />
               </template>
@@ -204,7 +214,7 @@ defineShortcuts({
         </div>
 
         <!-- Main Section -->
-        <template v-if="(current instanceof Room)" >
+        <template v-if="(current instanceof Room) || (current instanceof Section)" >
           <CustomizerSched :sched="current.scheds" />
         </template>
         <template v-else-if="(current instanceof Course)">

@@ -9,6 +9,7 @@ import { Day } from '~/types/DaySched';
 
 const customizerStore = useCustomizerStore();
 const act = computed(() => customizerStore.selectedAct);
+const mode = computed(() => customizerStore.mode);
 
 const timetableStore = useTimetableStore();
 const data = computed(() => timetableStore.selected?.data?.sched);
@@ -276,7 +277,7 @@ const remove = () => {
               </div>
 
             </div>
-            <div v-else class="error">[No Room]</div>
+            <div v-else class="warning">Online</div>
           </template>
 
           <template #option="{ option }: { option: Room }">
@@ -506,6 +507,10 @@ const remove = () => {
       </div>
       <div>
         <UButton color="red" @click="remove" block>Delete</UButton>
+      </div>
+      <div v-if="mode.value === 3">
+        <UButton :color="act.roomID === undefined ? 'primary' : 'white'" block 
+          @click="customizerStore.setToOnline(act)">{{ act.roomID === undefined ? 'Already Online' : 'Set to online' }}</UButton>
       </div>
 
     </div>

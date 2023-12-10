@@ -34,7 +34,7 @@
         <!-- -->
         <div class="flex-grow flex gap-6 min-h-0">
             <!-- Parameters -->
-            <div class="h-full  overflow-auto">
+            <div class="h-full">
                 <UVerticalNavigation
                     class="border-s border-secondary pl-0"
                     :links="paramlinks"

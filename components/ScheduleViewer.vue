@@ -155,7 +155,7 @@ const getPosition = (minutes: number, isStart: boolean = true) : number => {
                                     {{ a.instructor(instructors)?.name || `[No Instructor]`}}
                                 </span>
                                 <span v-if="!(value instanceof Room)">
-                                    {{ a.room(rooms)?.name || `[No Room]`}}
+                                    {{ a.room(rooms)?.name || `Online`}}
                                 </span>
                                 <!-- <span>
                                     {{ a.id }}

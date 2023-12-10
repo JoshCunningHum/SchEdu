@@ -36,7 +36,7 @@ const setTeacher = (t: Instructor) => {
 </script>
 
 <template>
-  <div class="poppins flex flex-col h-full min-h-0 p-2 overflow-y-auto scroll-stable">
+  <div class="poppins flex flex-col h-full min-h-0 p-2 overflow-y-auto scroll-stable ">
     <div class="py-1 text-xs text-secondary-em">Current Teacher</div>
     <div :class="`${!instructor ? 'warning' : ''} flex justify-between`">
       <!-- TODO: Put warning and notification -->
@@ -51,9 +51,9 @@ const setTeacher = (t: Instructor) => {
       <div v-if="!instructor || t.id !== instructor.id" :class="`rounded-md flex gap-2 items-center border flex border-transparent ${dragged?.id === t.id ? 'draggedTarget' : ''
         }`">
         <UButton trailing-icon="i-mdi-chevron-right" :padded="false" variant="link" label="Set" @click="setTeacher(t)" />
-        <div class="flex-grow flex justify-between">
+        <div class="flex-grow flex max-w-[200px] justify-between">
 
-          <span>{{ t.name }}</span>
+          <span class="truncate text-sm">{{ t.name }}</span>
 
           <div class="flex gap-2">
             <UPopover mode="hover" v-if="!!selected">
@@ -66,7 +66,7 @@ const setTeacher = (t: Instructor) => {
               </span>
 
               <template #panel>
-                <div class="p-2 error">Schedule Conflict</div>
+                <div class="p-2 text-sm error">Schedule Conflict</div>
               </template>
             </UPopover>
             
@@ -80,7 +80,7 @@ const setTeacher = (t: Instructor) => {
                 </span>
 
                 <template #panel>
-                  <div class="p-2 warning">{{ t.name }} does not do {{ course.name }}</div>
+                  <div class="p-2 text-sm warning">{{ t.name }} does not do {{ course.name }}</div>
                 </template>
               </UPopover>
 
@@ -108,7 +108,7 @@ const setTeacher = (t: Instructor) => {
 }
 
 .warning {
-  @apply text-amber-500;
+  @apply text-amber-500 ;
   font-weight: 400;
 }
 

@@ -40,8 +40,8 @@ const ondragstart = (e: DragEvent, a: Activity) => {
   c.width = c.height = 50;
   e.dataTransfer?.setDragImage(c, 25, 25);
 
-  // Create this section's primary filter
-  const s = a.section(sections.value);
+  // Create this section's primary filter (room when on mode 3)
+  const s = mode.value.value === 3 ? a.room(rooms.value) : a.section(sections.value);
   if (!!s) primaryFilter.value = s.scheds;
 
   // Create this instructor's secondary filter
@@ -159,8 +159,8 @@ const errors = computed(() => {
     <span class="text-center">
       {{ instructor?.name || `[No Instructor]` }}
     </span>
-    <span class="text-center">
-      {{ room?.name || `[No Room]` }}
+    <span :class="`text-center ${!room ? 'online' : ''}`">
+      {{ room?.name || `Online` }}
     </span>
 
     <!-- Alerter -->
@@ -306,12 +306,21 @@ const errors = computed(() => {
 
     &.selected {
       @apply bg-green-300;
+
     }
   }
 
   &.selected {
     @apply bg-accent;
+    & > span.online{
+      @apply text-amber-900;
+      font-weight: 600;
+    }
   }
+  span.online{
+      @apply text-amber-500;
+      font-weight: 400;
+    }
 
   &.lacking {
     @apply bg-amber-600 border-amber-600;
