@@ -35,10 +35,10 @@ export class TimetableSettings {
     room_types: RoomTypeArray = new RoomTypeArray().from(['Normal', '#555555'], ['Large', '#1E1B18'], ['ScienceLab', '#2D9E61'], ['ComLab', '#A78BFB']);
 
     // Constraints
-    max_instructor_minutes_per_day = 480;
+    max_instructor_minutes_per_day = Number.MAX_SAFE_INTEGER;
     max_student_minutes_per_day = Number.MAX_SAFE_INTEGER;
     max_room_minutes_per_day = Number.MAX_SAFE_INTEGER;
-    max_consecutive_minutes = 240; // TODO: MAX_CONSEC_MINUTES
+    max_consecutive_minutes = Number.MAX_SAFE_INTEGER; // TODO: MAX_CONSEC_MINUTES
 }
 
 export interface TimetableParams {

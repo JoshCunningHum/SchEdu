@@ -264,6 +264,7 @@ const ondrop = (e: DragEvent) => {
           <template v-if="!!sched && sched.length > i - 1 && !!sched[i - 1]">
 
             <CustomizerSession v-for="a in sched[i - 1].activities" :act="a" :key="a.id" 
+            :periodHeight="heightPerPeriod"
             :style="`width: ${_actwidth}; top: ${getPosition(a.start_time) - 1}px; height: ${getPosition(a.duration, false) + 1}px;`"/>
 
           </template>

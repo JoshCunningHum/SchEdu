@@ -5,6 +5,7 @@ import { Room, RoomArray } from '~/types/Room';
 import { Section, SectionArray } from '~/types/Section';
 import { TimetableSettings } from '~/types/Timetable';
 import { Day } from '~/types/DaySched';
+import type { Activity } from '~/types/Activity';
 
 
 const customizerStore = useCustomizerStore();
@@ -94,9 +95,9 @@ watch(section, v => {
 
 // Transfer Checks
 const checkSched = customizerStore.checkSched;
-const checkClasses = customizerStore.checkClasses;
+const checkClasses = (a: Course | Activity, v: Section) => customizerStore.checkClasses(a, v) / 60;
 
-const courseMeeting = computed(() => !!course.value ? course.value.weekly_meetings : 0);
+const hoursPerWeek = computed(() => !!course.value ? course.value.minutes / 60 : 0);
 
 const compat_teachers = computed(() => instructors.value.filter(i => !!course.value && i.compatible_courses.has(course.value)))
 const compat_courses = computed(() => instructor.value?.compatible_courses || []);
@@ -144,7 +145,7 @@ const remove = () => {
                 <UPopover mode="hover" v-if="!!section">
                   <span class="w-3 h-full flex items-center">
 
-                    <span v-if="checkClasses(course, section) <= (act.courseID === course.id ? -1 : 0)"
+                    <span v-if="checkClasses(course, section) < 0"
                       :class="`${checkClasses(course, section) < 0 ? 'error' : 'warning'} flex items-center`">
                       <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
@@ -153,7 +154,7 @@ const remove = () => {
 
                   <template #panel>
                     <div :class="`${checkClasses(course, section) < 0 ? 'error' : 'warning full'} p-2`">{{ course?.name }}-{{ section.id }} : {{
-                      course.weekly_meetings - checkClasses(course, section) }} / {{ course.weekly_meetings }}</div>
+                      hoursPerWeek - checkClasses(course, section) }} / {{ hoursPerWeek }}</div>
                   </template>
                 </UPopover>
 
@@ -199,7 +200,7 @@ const remove = () => {
               <UPopover mode="hover" v-if="!!section">
                 <span class="w-3 h-full flex items-center">
 
-                  <span v-if="checkClasses(option, section) <= (act.courseID === option.id ? -1 : 0)"
+                  <span v-if="act.courseID === option.id ? checkClasses(option, section) < 0 : checkClasses(option, section) <= 0"
                     :class="`${checkClasses(option, section) < 0 ? 'error' : 'warning'} flex items-center`">
                     <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
@@ -208,7 +209,7 @@ const remove = () => {
 
                 <template #panel>
                   <div :class="`${checkClasses(option, section) < 0 ? 'error' : 'warning full'} p-2`">{{ option?.name }}-{{ section.id }} : {{
-                    option.weekly_meetings - checkClasses(option, section) }} / {{ option.weekly_meetings }}</div>
+                    hoursPerWeek - checkClasses(option, section) }} / {{ hoursPerWeek }}</div>
                 </template>
               </UPopover>
 
@@ -408,6 +409,7 @@ const remove = () => {
         <!-- Section Select -->
         <USelectMenu :options="sections" option-attribute="" :popper="{ placement: 'left-start' }" v-model="section">
 
+          <!-- Label -->
           <template #label>
             <div class="flex justify-between items-center w-full gap-2" v-if="!!section">
 
@@ -431,7 +433,7 @@ const remove = () => {
                 <UPopover mode="hover">
                   <span class="w-3 h-full flex items-center">
 
-                    <span v-if="checkClasses(act, section) <= (act.sectionID === section.id ? -1 : 0)"
+                    <span v-if="act.sectionID === section.id ? checkClasses(act, section) < 0 : checkClasses(act, section) <= 0"
                       :class="`${checkClasses(act, section) < 0 ? 'error' : 'warning'} flex items-center`">
                       <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
@@ -440,7 +442,7 @@ const remove = () => {
 
                   <template #panel>
                     <div :class="`p-2 ${checkClasses(act, section) < 0 ? 'error' : 'warning'}`">{{ course?.name }}: {{
-                      courseMeeting - checkClasses(act, section) }} / {{ courseMeeting }}</div>
+                      hoursPerWeek - checkClasses(act, section) }} / {{ hoursPerWeek }}</div>
                   </template>
                 </UPopover>
               </div>
@@ -472,7 +474,7 @@ const remove = () => {
               <UPopover mode="hover">
                 <span class="w-3 h-full flex items-center">
 
-                  <span v-if="checkClasses(act, option) <= (act.sectionID === option.id ? -1 : 0)"
+                  <span v-if="act.sectionID === option.id ? checkClasses(act, option) < 0 : checkClasses(act, option) <= 0"
                     :class="`${checkClasses(act, option) < 0 ? 'error' : 'warning'} flex items-center`">
                     <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>
@@ -481,7 +483,7 @@ const remove = () => {
 
                 <template #panel>
                   <div :class="`p-2 ${checkClasses(act, option) < 0 ? 'error' : 'warning full'}`">{{ course?.name }}: {{
-                    courseMeeting - checkClasses(act, option) }} / {{ courseMeeting }}</div>
+                    hoursPerWeek - checkClasses(act, option) }} / {{ hoursPerWeek }}</div>
                 </template>
               </UPopover>
 

@@ -37,20 +37,44 @@ const show = computed(() => !!item.value && (!props.filter ||
 
 // Course
 const course_offers = (c: Course): number => {
-  const { weekly_meetings: meetings } = c;
-  const offered = sections.value.reduce((acc, s) => acc += s.section_courses.some(co => co.equals(c)) ? 1 : 0, 0);
-  return meetings * offered;
+  const minutesPerWeek = c.minutes;
+
+  const offered = sections.value.reduce((acc, s) => acc += (s.section_courses.some(co => co.equals(c)) ? 1 : 0), 0);
+  return minutesPerWeek * offered / 60;
 }
 
 const offers_left = (c: Course): number => {
   const offers = course_offers(c);
   // Loop through all room activities and count all activities with course id same as the parameter
-  const count = activities.value.filter(a => a.courseID === c.id).length;
-  return offers - count;
+  const count = activities.value.filter(a => a.courseID === c.id).reduce((acc, a) => acc += a.duration , 0);
+  return offers - (count / 60);
+}
+
+const section_activities = (s: Section) => activities.value.filter(a => a.sectionID === s.id);
+
+const non_following = (c: Course) : {section: Section, hrs: number, hrsW: number}[] => {
+  const arr : {section: Section, hrs: number, hrsW: number}[] = [];
+  const { minutes: minutesPerWeek } = c;
+  const hrsPerWeek = minutesPerWeek / 60;
+
+  // Loop through all the section activities and get their total duration of this course
+  get(sections).forEach(s => arr.push({section: s, hrs: hrsPerWeek - (section_activities(s).reduce((acc, a) => acc += (a.courseID === c.id ? a.duration : 0), 0) / 60), hrsW: hrsPerWeek}));
+  return arr;
+}
+
+const lacking_sections = (c: Course) : {section: Section, hrs: number, hrsW: number}[] => {
+  return non_following(c).filter(s => s.hrs > 0)
+}
+
+const exceeding_sections = (c: Course) : {section: Section, hrs: number, hrsW: number}[] => {
+  return non_following(c).filter(s => s.hrs < 0)
 }
 
 const cov = computed(() => item.value instanceof Course ? course_offers(item.value) : 0);
 const olv = computed(() => item.value instanceof Course ? offers_left(item.value) : 0);
+
+const lsc = computed(() => item.value instanceof Course ? lacking_sections(item.value) : []);
+const esc = computed(() => item.value instanceof Course ? exceeding_sections(item.value) : []);
 
 const c_sections = computed(() => {
   if (!(item.value instanceof Course)) return [];
@@ -62,7 +86,7 @@ const c_sections = computed(() => {
 const section_classes = (s: Section) => {
   return s.section_courses.map(c => {
     return {
-      meetings: c.weekly_meetings,
+      meetings: c.minutes / 60,
       count: 0, // To be modified in section actual
       course: c.name,
       id: c.id
@@ -71,11 +95,11 @@ const section_classes = (s: Section) => {
 }
 
 const section_actual_classes = (s: Section) => {
-  const section_activities = activities.value.filter(a => a.sectionID === s.id);
+  const sas = section_activities(s);
 
   const classes = section_classes(s);
   classes.forEach(stat => {
-    stat.count = section_activities.reduce((acc, a) => acc += (a.courseID === stat.id ? 1 : 0), 0);
+    stat.count = sas.reduce((acc, a) => acc += (a.courseID === stat.id ? a.duration/60 : 0), 0);
   })
 
   return classes;
@@ -86,7 +110,6 @@ const sac = computed(() => item.value instanceof Section ? section_actual_classe
 // Instructors
 
 const checkSched = customizerStore.checkSched;
-
 
 // Error and Warnings
 
@@ -198,13 +221,17 @@ const onmouseleave = (e: MouseEvent) => {
 
             <div class="warning">
               <div v-if="olv > 0">
-                <div>Lacking assignments: {{ cov - olv }} / {{ cov }}</div>
+                <div>Lacking assignments: {{ cov - olv }}hr / {{ cov }}hr</div>
               </div>
+              <div v-for="stat in lsc" :key="stat.section.id">
+                <div>{{ stat.section.id }}: {{ stat.hrsW - stat.hrs }}hr / {{ stat.hrsW }}hr</div>
+              </div>
+
               <div v-if="!!sac && sac.some(stat => stat.count < stat.meetings)">
                 <div>Lacking course assignments</div>
                 <div v-for="stat in sac">
                   <div v-if="stat.count < stat.meetings">
-                    - {{ stat.course }}: {{ stat.count }} / {{ stat.meetings }}
+                    - {{ stat.course }}: {{ stat.count }}hr / {{ stat.meetings }}hr
                   </div>
                 </div>
               </div>
@@ -212,13 +239,17 @@ const onmouseleave = (e: MouseEvent) => {
 
             <div class="error">
               <div v-if="olv < 0">
-                <div>Exceeding assignments: {{ cov - olv }} / {{ cov }}</div>
+                <div>Exceeding assignments: {{ cov - olv }}hr / {{ cov }}hr</div>
               </div>
+              <div v-for="stat in esc" :key="stat.section.id">
+                <div>{{ stat.section.id }}: {{ stat.hrsW - stat.hrs }}hr / {{ stat.hrsW }}hr</div>
+              </div>
+
               <div v-if="!!sac && sac.some(stat => stat.count > stat.meetings)">
                 <div>Exceeded course assignments</div>
                 <div v-for="stat in sac">
                   <div v-if="stat.count > stat.meetings">
-                    - {{ stat.course }}: {{ stat.count }} / {{ stat.meetings }}
+                    - {{ stat.course }}: {{ stat.count }}hr / {{ stat.meetings }}hr
                   </div>
                 </div>
               </div>

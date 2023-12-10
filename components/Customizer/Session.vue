@@ -4,10 +4,16 @@ import { Course } from '~/types/Course';
 import { Section } from '~/types/Section';
 import { Day } from '~/types/DaySched';
 import { Instructor } from '~/types/Instructor';
+import { get } from '@vueuse/core';
+import { Room } from '~/types/Room';
 
 const props = defineProps({
   act: {
     type: Activity,
+    required: true
+  },
+  periodHeight: {
+    type: Number,
     required: true
   }
 })
@@ -17,28 +23,64 @@ const act = computed(() => props.act);
 // Stores
 const customizerstore = useCustomizerStore();
 const {
-  courses, rooms, instructors, sections, activities,
-  dragged, hovered, mode, selectedAct: selected, previewAct: _act,
+  courses, rooms, instructors, sections, activities, settings,
+  dragged, hovered, mode, selectedAct: selected, previewAct: _act, displayed,
   primaryFilter, secondaryFilter
 } = storeToRefs(customizerstore);
 
+const interval = computed(() => settings.value?.interval || 30);
+
 // Associated Data
 const day = computed(() => act.value.sched);
+const start = computed(() => act.value.start_time);
+const duration = computed(() => act.value.duration);
 const course = computed(() => act.value.course(courses.value));
 const room = computed(() => act.value.room(rooms.value));
 const instructor = computed(() => act.value.instructor(instructors.value));
 const section = computed(() => act.value.section(sections.value));
 
+//#region Shrinking/Expanding session duration
+const extender = ref<InstanceType<typeof HTMLDivElement>>();
+const session = ref<InstanceType<typeof HTMLDivElement>>();
+
+const ishovered = ref(false); // Needs to hover to start
+const { pressed: isdragging } = useMousePressed({ target: extender });
+const { elementY: top, elementHeight: height } = useMouseInElement(session);
+
+whenever(top, v => {
+  if(!get(isdragging)) return;
+
+  const hperiod = props.periodHeight;
+
+  // calculate how many periods depending on top
+  const periods = v < hperiod ? 1 : Math.ceil(v / hperiod);
+
+  // TODO: Do a check for conflict, stop when conflict
+  const sched = displayed.value instanceof Room || displayed.value instanceof Section ? displayed.value.scheds : undefined;
+  if(!sched) return;
+
+  const cend = get(start) + (periods * interval.value);
+
+  const isconflict = sched[get(day) - 1].activities.some(a => a.id !== act.value.id && (a.start_time <  cend && a.end > cend || a.end === cend));
+
+  if(isconflict) return;
+
+  act.value.duration = periods * interval.value;
+})
+
 //#region Dragging the session
 
 const ondragstart = (e: DragEvent, a: Activity) => {
-  // customizerStore.remove(a);
-  _act.value = a.clone();
-
   // Disable Drag Image
   const c = document.createElement('canvas');
   c.width = c.height = 50;
   e.dataTransfer?.setDragImage(c, 25, 25);
+
+  if(!!isdragging.value) return;
+
+  // customizerStore.remove(a);
+  _act.value = a.clone();
+
 
   // Create this section's primary filter (room when on mode 3)
   const s = mode.value.value === 3 ? a.room(rooms.value) : a.section(sections.value);
@@ -100,8 +142,8 @@ const conflict_room = computed(() => room.value?.scheds[day.value - 1].getConfli
 const conflict_inst = computed(() => instructor.value?.scheds[day.value - 1].getConflicts(act.value) || []);
 const conflict_sect = computed(() => section.value?.scheds[day.value - 1].getConflicts(act.value) || []);
 
-const course_class_req = computed(() => course.value?.weekly_meetings || 0);
-const course_class_count = computed(() => !!section.value ? customizerstore.checkClasses(act.value, section.value) : 0);
+const course_class_req = computed(() => (course.value?.minutes || 0) / 60 || 0);
+const course_class_count = computed(() => !!section.value ? customizerstore.checkClasses(act.value, section.value) / 60 : 0);
 
 // Warnings
 
@@ -148,9 +190,10 @@ const errors = computed(() => {
     } ${mode.value === 1 && !act.sectionID ? 'lacking' : ''
     } ${dragged instanceof Section ? 'z-30' : ''
     } ${!!_act ? (_act.id === act.id ? '' : 'pointer-events-none') : ''
-    }`" :draggable="true" @dragstart="ondragstart($event, act)" @dragend="ondragend($event, act)"
-    @dragover="ondragover($event, act)" @drop="ondrop($event, act)" @dragleave="ondragleave($event, act)"
-    @dragenter="ondragenter($event, act)" @click="select(act)">
+    }`" :draggable="!isdragging" @dragstart="ondragstart($event, act)" @dragend="ondragend($event, act)"
+    @dragover="ondragover($event, act)" @drop="ondrop($event, act)" @dragleave="ondragleave($event, act)" @mouseover="ishovered = true" @mouseleave="ishovered = false"
+    @dragenter="ondragenter($event, act)" @click="select(act)"
+    ref="session">
     <span class="text-center">
       {{ course?.name }}
       -
@@ -162,6 +205,7 @@ const errors = computed(() => {
     <span :class="`text-center ${!room ? 'online' : ''}`">
       {{ room?.name || `Online` }}
     </span>
+    <!-- <span>{{ top }}</span> -->
 
     <!-- Alerter -->
     <UPopover mode="hover"
@@ -185,7 +229,7 @@ const errors = computed(() => {
               {{ section?.id }} does not offer {{ course.name }}
             </div>
             <div v-if="course_class_count > 0">
-              {{ course.name }}-{{ section?.id }}: {{ course_class_count }} / {{ course_class_req }}
+              {{ course.name }}-{{ section?.id }}: {{ course_class_count }}hr / {{ course_class_req }}hr
             </div>
           </div>
 
@@ -239,6 +283,11 @@ const errors = computed(() => {
 
     </UPopover>
 
+    <!-- Session Duration Editor -->
+    <div v-show="ishovered" class="extender" ref="extender">
+
+    </div>
+
   </div>
 </template>
 
@@ -251,6 +300,10 @@ const errors = computed(() => {
 
 .dashify+.dashify::before {
   content: ' - ';
+}
+
+.extender{
+  @apply cursor-s-resize absolute border-t border-dashed h-3 w-full bottom-0 left-0;
 }
 
 .warning {
@@ -294,7 +347,7 @@ const errors = computed(() => {
 }
 
 .activity {
-  @apply absolute flex bg-primary items-center justify-center border border-accent text-xs flex-col mx-auto cursor-pointer left-0 right-0;
+  @apply absolute flex bg-primary items-center justify-center border border-accent text-xs flex-col mx-auto cursor-pointer left-0 right-0 overflow-hidden;
 
 
   &.not-allowed {
