@@ -26,22 +26,22 @@ const mcm = computed({
   <div class="flex flex-col gap-2">
 
     <UFormGroup label="Max Instructor Minutes per Day"
-      help="TODO: What does this do?">
+      help="The highest amount of time (in minutes) instructors are permitted to spend in classes each day.">
       <UInput type="number"  class="w-[150px]" v-model="mim"/>
     </UFormGroup>
 
     <UFormGroup label="Max Students Minutes per Day"
-      help="TODO: What does this do?">
+      help="The highest amount of time (in minutes) students are permitted to spend in classes each day.">
       <UInput type="number"  class="w-[150px]" v-model="msm"/>
     </UFormGroup>
 
     <UFormGroup label="Max Room Minutes per Day"
-      help="TODO: What does this do?">
+      help="The highest amount of time (in minutes) rooms can be used for classes each day.">
       <UInput type="number"  class="w-[150px]" v-model="mrm"/>
     </UFormGroup>
 
     <UFormGroup label="Max Consecutive Minutes"
-      help="TODO: What does this do?">
+      help="The highest amount of time (in minutes) that instructors may spend in class uninterrupted.">
       <UInput type="number" class="w-[150px]" v-model="mcm" />
     </UFormGroup>
 
