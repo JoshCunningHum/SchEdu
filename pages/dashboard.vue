@@ -129,13 +129,6 @@
                                             >Export to CSV</UButton
                                         >
                                         <UButton
-                                            icon="i-mdi-image-area"
-                                            padded
-                                            color="black"
-                                            variant="link"
-                                            >Export to PNG</UButton
-                                        >
-                                        <UButton
                                             icon="i-mdi-trash"
                                             padded
                                             color="red"
