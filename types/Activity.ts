@@ -49,14 +49,14 @@ export class Activity extends ExtE<Activity>{
     }
 
     section(arr: SectionArray) {
-        return arr.find(s => s.id === this.sectionID);
+        return arr.find(s => s._id === this.sectionID);
     }
 
     change(v: Course | Room | Instructor | Section){
         if(v instanceof Course) this.courseID = v.id;
         else if(v instanceof Room) this.roomID = v.id;
         else if(v instanceof Instructor) this.instructorID = v.id;
-        else if(v instanceof Section) this.sectionID = v.id;
+        else if(v instanceof Section) this.sectionID = v._id;
     }
 
     get end(){

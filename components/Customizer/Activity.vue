@@ -80,12 +80,12 @@ watch(instructor, v => {
 })
 
 watchImmediate(_section, v => {
-  if ((!!section.value && section.value.id === v)) return;
-  section.value = sections.value.find(c => c.id === v);
+  if ((!!section.value && section.value._id === v)) return;
+  section.value = sections.value.find(c => c._id === v);
 })
 
 watch(section, v => {
-  if (!v || (!!_section.value && _section.value === v.id) || !act.value) return;
+  if (!v || (!!_section.value && _section.value === v._id) || !act.value) return;
 
   // Perform Transfer
   if (!!v) customizerStore.transfer(act.value, v);
@@ -413,7 +413,7 @@ const remove = () => {
           <template #label>
             <div class="flex justify-between items-center w-full gap-2" v-if="!!section">
 
-              <span class="truncate">{{ section.id }}</span>
+              <span class="truncate">{{ section.id }} - {{ useOrdinalize(section.year_level) }} Year</span>
 
               <div class="flex gap-2">
                 <UPopover mode="hover">
@@ -433,7 +433,7 @@ const remove = () => {
                 <UPopover mode="hover">
                   <span class="w-3 h-full flex items-center">
 
-                    <span v-if="act.sectionID === section.id ? checkClasses(act, section) < 0 : checkClasses(act, section) <= 0"
+                    <span v-if="act.sectionID === section._id ? checkClasses(act, section) < 0 : checkClasses(act, section) <= 0"
                       :class="`${checkClasses(act, section) < 0 ? 'error' : 'warning'} flex items-center`">
                       <UIcon name="i-mdi-alert" class="pulsating" />
                     </span>
@@ -451,11 +451,11 @@ const remove = () => {
             <div v-else class="error">[ No Section ]</div>
           </template>
 
-          <!-- Section -->
+          <!-- Option -->
           <template #option="{ option }: { option: Section, selected: boolean }">
             <div class="flex justify-between items-center w-full gap-2">
 
-              <span>{{ option.id }}</span>
+              <span>{{ option.id }} - {{ useOrdinalize(option.year_level) }} Year</span>
 
               <UPopover mode="hover">
                 <span class="w-3 h-full flex items-center">
@@ -474,7 +474,7 @@ const remove = () => {
               <UPopover mode="hover">
                 <span class="w-3 h-full flex items-center">
 
-                  <span v-if="act.sectionID === option.id ? checkClasses(act, option) < 0 : checkClasses(act, option) <= 0"
+                  <span v-if="act.sectionID === option._id ? checkClasses(act, option) < 0 : checkClasses(act, option) <= 0"
                     :class="`${checkClasses(act, option) < 0 ? 'error' : 'warning'} flex items-center`">
                     <UIcon name="i-mdi-alert" class="pulsating" />
                   </span>

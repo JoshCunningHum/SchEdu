@@ -307,7 +307,7 @@ export class Timetable {
                     hasNoConflict &&
                     hasNoViolation    
                 ){
-                    a.sectionID = s.id;
+                    a.sectionID = s._id;
                     s.scheds[a.sched - 1].addExistingActivity(a);
                     meetings--;
                     if(DEV_MODE) console.log(`%cSuccessfully Added Activity`, 'color:green;');

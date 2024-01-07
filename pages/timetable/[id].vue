@@ -110,7 +110,7 @@ const paramlinks = [
         shortcuts: ['Z']
     },
     {
-        label: 'Sections',
+        label: 'Offerings',
         to: { name: 'timetable-id-sections', params: { id: id }},
         shortcuts: ['B']
     },

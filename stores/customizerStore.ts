@@ -72,7 +72,7 @@ export const useCustomizerStore = defineStore('customizer', () => {
 
     const meetings = course.minutes;
 
-    const sacts = activities.value.filter(a => a.sectionID === s.id);
+    const sacts = activities.value.filter(a => a.sectionID === s._id);
     const count = sacts.reduce((acc, a) => acc += (a.courseID === course.id) ? a.duration : 0, 0);
     
     return meetings - count;

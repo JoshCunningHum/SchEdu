@@ -62,13 +62,6 @@ const select = (row: Course) => {
   }
 }
 
-const copy = (cs: CourseArray) => {
-  selectedCourses.value.splice(0);
-  selectedCourses.value.push(...cs);
-  props.modelValue.splice(0);
-  props.modelValue.push(...cs);
-}
-
 </script>
 
 <template>
@@ -108,22 +101,6 @@ const copy = (cs: CourseArray) => {
 
       </div>
       <UButton @click="() => (search = '') || (roomTypeFilter.splice(0))" v-if="!!search || roomTypeFilter.length" color="white">Reset</UButton>
-    </div>
-    <div v-if="!!copies && copies.length">
-      <UPopover :popper="{ offsetDistance: 10, placement: 'bottom-end' }">
-
-        <UButton color="white" label="Copy From" trailing-icon="i-mdi-chevron-down" />
-
-        <template #panel>
-          <div class="flex flex-col p-1 gap-1">
-            <UButton class="w-[175px]" color="gray" @click="copy(c.courses)" v-for="c in copies" :key="c.label"
-              variant="link">
-              {{ c.label }}
-            </UButton>
-          </div>
-        </template>
-
-      </UPopover>
     </div>
   </div>
 

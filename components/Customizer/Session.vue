@@ -122,7 +122,7 @@ const ondrop = (e: DragEvent, a: Activity) => {
   // Remove this activity to the section sched array
   a.section(sections.value)?.scheds[day - 1].activities.remove(ac => ac.id === a.id);
 
-  a.sectionID = dragged.value.id;
+  a.sectionID = dragged.value._id;
   a.section(sections.value)?.scheds[day - 1].activities.push(a);
 }
 //#endregion

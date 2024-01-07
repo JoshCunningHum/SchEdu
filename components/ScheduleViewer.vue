@@ -92,14 +92,14 @@ const getPosition = (minutes: number, isStart: boolean = true) : number => {
                                 <span v-if="(value instanceof Room)">
                                     <span :style="`background: ${value.type.color};`" class="inline-block h-2 w-2 flex-shrink-0 rounded-full"></span>
                                 </span>
-                                {{ category.slice(0, -1) }} - {{ value instanceof Section ? value.id : value instanceof Room || value instanceof Instructor ? value.name : 'None Selected' }}
+                                {{ category.slice(0, -1) }} - {{ value instanceof Section ? `${value.id} - ${useOrdinalize(value.year_level)} Year` : value instanceof Room || value instanceof Instructor ? value.name : 'None Selected' }}
                             </template>
 
                             <template #option="{ option: value }">
                                 <span v-if="(value instanceof Room)">
                                     <span :style="`background: ${value.type.color};`" class="inline-block h-2 w-2 flex-shrink-0 rounded-full"></span>
                                 </span>
-                                <span> {{ value instanceof Section ? value.id : value instanceof Room || value instanceof Instructor ? value.name : '' }} </span>
+                                <span> {{ value instanceof Section ? `${value.id} - ${useOrdinalize(value.year_level)} Year` : value instanceof Room || value instanceof Instructor ? value.name : '' }} </span>
                             </template>
 
                             <template #option-empty="{ query }">

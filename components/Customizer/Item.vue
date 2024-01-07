@@ -50,7 +50,7 @@ const offers_left = (c: Course): number => {
   return offers - (count / 60);
 }
 
-const section_activities = (s: Section) => activities.value.filter(a => a.sectionID === s.id);
+const section_activities = (s: Section) => activities.value.filter(a => a.sectionID === s._id);
 
 const non_following = (c: Course) : {section: Section, hrs: number, hrsW: number}[] => {
   const arr : {section: Section, hrs: number, hrsW: number}[] = [];
@@ -191,7 +191,7 @@ const onmouseleave = (e: MouseEvent) => {
 
       <!-- Section Special -->
       <template v-if="(item instanceof Section) && (!filter || item.id.includes(filter))">
-        <span>{{ item.id }}</span>
+        <span>{{ item.id }} - {{ useOrdinalize(item.year_level) }} Year</span>
       </template>
       <!-- Course and Room Special -->
       <template v-else-if="!!item && !(item instanceof Section)">

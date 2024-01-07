@@ -207,6 +207,8 @@ export class Serializer{
                 settings,
                 id: s.id
             });
+            n.year_level = s.year_level || 1;
+            n._id = s._id || useGenID(16);
 
             
             // Replicate DayArray
