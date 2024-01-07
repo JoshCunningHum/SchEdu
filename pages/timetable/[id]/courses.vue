@@ -90,7 +90,7 @@ onMounted(() => {
                 </template>
 
                 <div>
-                    <UFormGroup :help="!name ? 'Room needs a name' : undefined">
+                    <UFormGroup :help="!name ? 'Course needs a name' : undefined">
                         <div class="flex flex-col gap-2">
 
                             <div>
