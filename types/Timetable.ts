@@ -84,60 +84,43 @@ export class Timetable {
 
         console.log("Inputs: ", rooms, courses, instructors, sections, this.settings);
 
+        const MAX_ATTEMPTS = sections.length * courses.length + 1;
+        Array<number>(MAX_ATTEMPTS).fill(0).some((_, i) => {
+            // We use some in this case since it will automatically stop when we return true
+            
+            courses.sort((a, b) => a.compatible_rooms.length - b.compatible_rooms.length);
+            courses.forEach(c => this.putCourseToRooms(c, i)); // We pass the class offering adjustment
 
-        // SUGGEST: Doesn't even needed to create a copy, a sorted courseArray does not matter much 
-        // Get a copy of all courses then sort them by the amount of room types they are available
-        courses.sort((a, b) => a.compatible_rooms.length - b.compatible_rooms.length);
+            instructors.sort((a, b) => a.compatible_courses.length - b.compatible_courses.length);
+            instructors.forEach(i => this.putInstructorToRooms(i));
 
-        // Original
-        // for(let i = 1; i <= room_types.length || courseCopy.length > 0; i++){
-        //     for(let j = 0; j < courseCopy.length; j++){
-        //         const c = courseCopy[j];
-        //         if(c.compatible_rooms.length === i){
-        //             this.putCourseToRooms(c, rooms);
-        //             courseCopy.remove(c);
-        //             j--;
-        //         }
-        //     }
-        // }
+            sections.forEach(s => this.putSectionToRooms(s));
 
-        // Rewritten
-        courses.forEach(c => this.putCourseToRooms(c));
+            this.removeNoSection();
 
-        // SUGGEST: Same Here, doesn't need to be sorted
-        // Get a copy of all instructors and sort the amount of courses they can teach
-        instructors.sort((a, b) => a.compatible_courses.length - b.compatible_courses.length);
+            if(this.checkSectionCompletion()){
+                console.log(`Completed after ${i} increments`);
+                return true;
+            }
 
-        // Original
-        // for(let i = 1; i <= courses.length || instructorCopy.length > 0; i++){
-        //     for(let j = 0; j < instructorCopy.length; j++){
-        //         const inst = instructorCopy[j];
-        //         if(inst.compatible_courses.length === i){
-        //             this.putInstructorToRooms(inst, rooms, courses);
-        //             instructorCopy.remove(inst);
-        //             j--;
-        //         }
-        //     }
-        // }
+            if(i < MAX_ATTEMPTS - 1) this.reset();
 
-        // Rewritten
-        instructors.forEach(i => this.putInstructorToRooms(i));
+            return false;
+        })
 
-        // Distribute section to classes
-        sections.forEach(s => this.putSectionToRooms(s));
 
         // [ ]: Validate
         this.checkTimeTableHealth();
     }
 
-    putCourseToRooms(c: Course) {
-        const { settings } = this, DEV_MODE = false;
+    putCourseToRooms(c: Course, class_offering_adjustment: number = 0) {
+        const { settings } = this, DEV_MODE = true;
         const { once_prio: once, twice_prio: twice, thrice_prio: thrice } = settings;
 
         let { weekly_meetings: meetings } = c, instance = 1, duration = c.minutes / c.weekly_meetings;
         
-        // classes offered now depends on how many sections needs that course
-        let classes_offered = this.sections.reduce((acc: number, s: Section) => acc += s.section_courses.some(co => co.equals(c)) ? 1 : 0, 0)
+        // classes offered now depends on how many sections needs that course + adjustment
+        let classes_offered = this.sections.reduce((acc, s) => acc += s.section_courses.some(co => co.equals(c)) ? 1 : 0, class_offering_adjustment);
 
         // Can't write the orginal, too long, that's what she said
 
@@ -196,7 +179,7 @@ export class Timetable {
     }
 
     putInstructorToRooms(t: Instructor) {
-        const { settings, rooms } = this, DEV_MODE = false;
+        const { settings, rooms } = this, DEV_MODE = true;
         const { once_prio: once, twice_prio: twice, thrice_prio: thrice } = settings;
 
         const GetAllInstance = (arr: Activity[], inst: number, course: string) : Activity[] => arr.filter(a => a.instance === inst && a.courseID === course);
@@ -281,7 +264,7 @@ export class Timetable {
 
     putSectionToRooms(s: Section) {
         // return;
-        const DEV_MODE = false;
+        const DEV_MODE = true;
 
         if(DEV_MODE) console.log(`%c--- Putting Section: ---`, 'color:yellow;', s);
 
@@ -322,6 +305,41 @@ export class Timetable {
             })
         })
     }
+
+    checkSectionCompletion() : boolean {
+        return this.sections.every(s => 
+            s.section_courses.every(c => 
+                c.course_classes.some(a => a.sectionID === s._id)));
+    }
+
+    removeNoSection(){
+        // Get all activities with no section in it
+        const nosections = this.activities.filter(a => !a.sectionID);
+        // Loop through all the activies with no sections and remove their traces hehe
+        nosections.forEach(a => {
+            a.room(this.rooms)?.scheds.removeAct(a);
+            a.instructor(this.instructors)?.scheds.removeAct(a);
+            a.course(this.courses)?.course_classes.remove(a);
+
+            // Below is not possible because obviously
+            // a.section(this.sections)?.scheds.removeAct(a);
+
+            // Then remove it in the activities array
+            this.activities.remove(a);
+        })
+    }
+
+    reset(){
+        this.rooms.forEach(r => r.scheds.reset());
+        this.courses.forEach(c => c.course_classes.splice(0));
+        this.instructors.forEach(i => {
+            i.scheds.reset();
+            i.total_minutes = 0;
+        });
+        this.sections.forEach(s => s.scheds.reset());
+        this.activities.splice(0);
+    }
+
     print() {
 
     }

@@ -38,6 +38,14 @@ export class DaySchedArray extends Array<DaySched>{
         (i !== -1) && this.splice(i, 1);
     }
 
+    reset(){
+        this.forEach(ds => ds.reset());
+    }
+
+    removeAct(a: Activity){
+        this.forEach(ds => ds.removeAct(a));
+    }
+
     isAddable(a: Activity){
         return (a.sched - 1 < this.length) && this[a.sched - 1].isAddable(a);
     }
@@ -90,6 +98,17 @@ export class DaySched{
 
         // Set TimeTable Settings reference for later
         this.settings = settings;
+    }
+
+    reset(){
+        this.total_occupied_minutes = 0;
+        this.activities.splice(0);
+        const {interval, excluded_periods: exclusions } = this.settings;
+
+        const NumberOfPeriods = Math.floor(this.period_duration / interval);
+
+        this.current_vacant = 0;
+        this.is_vacant = new Array(NumberOfPeriods).fill(0).map((v, i) => !exclusions.includes(interval * i + this.period_start) || false);
     }
 
     // XXX: Change to validate
@@ -149,6 +168,10 @@ export class DaySched{
         for(let i = 0; i < act.duration / interval; i++) this.is_vacant[current_index + i] = false;
     }
 
+    removeAct(a: Activity){
+        this.activities.remove(a);
+    }
+
     checkVacant(start_time: number, duration: number) : boolean {
         let { period_start, settings: { interval } } = this;
         
@@ -196,7 +219,6 @@ export class DaySched{
     equals(sched: DaySched) : boolean {
         return this.day === sched.day;
     }
-
 
     get period_duration() : number {
         return this.period_end - this.period_start;
