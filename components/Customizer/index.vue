@@ -176,7 +176,7 @@ defineShortcuts({
               <template #label>
                 <span v-if="!current" class="flex items-center content-center gap-2">
                   <UIcon name="i-mdi-alert" class="text-red-500" />
-                  {{ mode.value === 3 ? 'Select Section' : 'Select Room' }}
+                  Select {{ mode.value === 2 ? 'Courses' : mode.value === 3 ? 'Section' : 'Room' }}
                 </span>
                 <span v-else-if="(current instanceof Section)" class="poppins">{{ current.id }}</span>
                 <span v-else-if="!(current instanceof Section)" class="poppins">{{ current.name }}</span>
